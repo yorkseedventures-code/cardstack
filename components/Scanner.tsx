@@ -51,7 +51,7 @@ export default function Scanner({ onExtracted }: ScannerProps) {
         video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } },
       });
       streamRef.current = stream;
-      if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.play(); }
+      if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.setAttribute("autoplay", ""); videoRef.current.setAttribute("playsinline", ""); videoRef.current.setAttribute("muted", ""); await videoRef.current.play(); }
       setMode("camera");
     } catch {
       setError("Camera not available — use upload instead");
@@ -79,7 +79,7 @@ export default function Scanner({ onExtracted }: ScannerProps) {
   if (mode === "camera") {
     return (
       <div className="relative w-full aspect-[4/3] bg-black rounded-2xl overflow-hidden">
-        <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
+        <video ref={videoRef} className="w-full h-full object-cover" autoPlay playsInline muted />
         <canvas ref={canvasRef} className="hidden" />
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="relative w-[85%] h-[55%]">
