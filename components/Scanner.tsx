@@ -89,24 +89,25 @@ export default function Scanner({ onExtracted }: ScannerProps) {
 
   if (mode === "camera") {
     return (
-      <div className="relative w-full aspect-[4/3] bg-black rounded-2xl overflow-hidden">
-        <video ref={videoRef} className="w-full h-full object-cover" autoPlay playsInline muted />
+      <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "#000" }}>
+        <video ref={videoRef} style={{ width: "100%", height: "100%", objectFit: "cover" }} autoPlay playsInline muted />
         <canvas ref={canvasRef} className="hidden" />
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="relative w-[85%] h-[55%]">
-            <div className="absolute inset-0 border-2 border-white/30 rounded-xl" />
-            <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-brand rounded-tl-xl" />
-            <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-brand rounded-tr-xl" />
-            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-brand rounded-bl-xl" />
-            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-brand rounded-br-xl" />
-            <div className="scan-line absolute left-2 right-2 h-px bg-brand/70 top-0" />
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+          <div style={{ position: "relative", width: "80%", height: "45%" }}>
+            <div style={{ position: "absolute", inset: 0, border: "1.5px solid rgba(255,255,255,0.2)", borderRadius: 16 }} />
+            <div style={{ position: "absolute", top: 0, left: 0, width: 28, height: 28, borderTop: "2px solid #FF0A0A", borderLeft: "2px solid #FF0A0A", borderRadius: "12px 0 0 0" }} />
+            <div style={{ position: "absolute", top: 0, right: 0, width: 28, height: 28, borderTop: "2px solid #FF0A0A", borderRight: "2px solid #FF0A0A", borderRadius: "0 12px 0 0" }} />
+            <div style={{ position: "absolute", bottom: 0, left: 0, width: 28, height: 28, borderBottom: "2px solid #FF0A0A", borderLeft: "2px solid #FF0A0A", borderRadius: "0 0 0 12px" }} />
+            <div style={{ position: "absolute", bottom: 0, right: 0, width: 28, height: 28, borderBottom: "2px solid #FF0A0A", borderRight: "2px solid #FF0A0A", borderRadius: "0 0 12px 0" }} />
           </div>
         </div>
-        <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-6">
-          <button onClick={stopCamera} className="w-12 h-12 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-white text-xl">X</button>
-          <button onClick={capturePhoto} className="w-16 h-16 rounded-full bg-brand border-4 border-white/30 flex items-center justify-center">
-            <div className="w-10 h-10 rounded-full bg-white/20" />
+        <p style={{ position: "absolute", top: "18%", left: 0, right: 0, textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: 13 }}>Position card inside the frame</p>
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, paddingBottom: 48, paddingTop: 24, display: "flex", justifyContent: "center", alignItems: "center", gap: 48, background: "linear-gradient(transparent, rgba(0,0,0,0.6))" }}>
+          <button onClick={stopCamera} style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(255,255,255,0.15)", border: "1.5px solid rgba(255,255,255,0.3)", color: "#fff", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+          <button onClick={capturePhoto} style={{ width: 72, height: 72, borderRadius: "50%", background: "#FF0A0A", border: "4px solid rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.2)" }} />
           </button>
+          <div style={{ width: 48 }} />
         </div>
       </div>
     );
@@ -134,8 +135,8 @@ export default function Scanner({ onExtracted }: ScannerProps) {
       onDragLeave={() => setDrag(false)}
       onDrop={(e) => { e.preventDefault(); setDrag(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
     >
-      <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }} />
-      <div className="w-14 h-14 rounded-2xl bg-[#f5f4f2] border border-[#e8e6e2] flex items-center justify-center text-2xl">ID</div>
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }} />
+      <div className="w-14 h-14 rounded-2xl bg-[#f5f4f2] border border-[#e8e6e2] flex items-center justify-center text-2xl">🪪</div>
       <div className="text-center">
         <p className="text-[#555] text-sm font-medium mb-1">Drop a business card photo</p>
         <p className="text-[#bbb] text-xs">or tap to browse</p>
