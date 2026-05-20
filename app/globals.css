@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-body: "Sora", sans-serif;
+  --font-display: "Instrument Serif", serif;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-body);
+  background: #f8f7f5;
+  color: #111;
+  min-height: 100dvh;
+}
+
+input, textarea, select {
+  font-family: var(--font-body);
+}
+
+/* Camera viewfinder animation */
+@keyframes scanline {
+  0% { transform: translateY(0); opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { transform: translateY(180px); opacity: 1; }
+}
+
+.scan-line {
+  animation: scanline 2s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.6; }
+  100% { transform: scale(1.05); opacity: 0; }
+}
+
+.pulse-ring {
+  animation: pulse-ring 1.5s ease-out infinite;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.slide-up {
+  animation: slideUp 0.35s ease forwards;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #f0eeeb 25%, #e8e6e2 50%, #f0eeeb 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+.field-input {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #e0ddd8;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #111;
+  outline: none;
+  transition: border-color 0.15s;
+  font-family: var(--font-body);
+}
+
+.field-input:focus {
+  border-color: #FF0A0A;
+}
+
+.field-input::placeholder {
+  color: #bbb;
+}
+
+textarea.field-input {
+  resize: none;
+  min-height: 72px;
+}
