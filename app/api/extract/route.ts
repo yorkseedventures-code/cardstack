@@ -3,6 +3,28 @@ import OpenAI from "openai";
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+async function findLinkedIn(name: string, company: string): Promise<string> {
+  try {
+    const query = `${name} ${company}`.trim();
+    const apiKey = process.env.GOOGLE_API_KEY;
+    const cseId = process.env.GOOGLE_CSE_ID;
+    
+    if (!apiKey || !cseId) return "";
+
+    const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cseId}&q=${encodeURIComponent(query)}&num=1`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const item = data.items?.[0];
+    if (item?.link?.includes("linkedin.com/in/")) {
+      return item.link;
+    }
+    return "";
+  } catch {
+    return "";
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { base64, mediaType } = await req.json();
@@ -49,6 +71,12 @@ No markdown fences, no explanation, just the raw JSON object.`,
     const text = response.choices[0]?.message?.content || "";
     const clean = text.replace(/```json|```/g, "").trim();
     const data = JSON.parse(clean);
+
+    // Auto-find LinkedIn if not on the card
+    if (!data.linkedin && (data.first_name || data.last_name)) {
+      const fullName = `${data.first_name} ${data.last_name}`.trim();
+      data.linkedin = await findLinkedIn(fullName, data.company || "");
+    }
 
     return NextResponse.json(data);
   } catch (err) {
