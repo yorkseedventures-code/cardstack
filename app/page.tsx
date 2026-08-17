@@ -1,158 +1,175 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { createClient } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 import Scanner from "@/components/Scanner";
 import ContactForm from "@/components/ContactForm";
 import ContactCard from "@/components/ContactCard";
-import Settings from "@/components/Settings";
-import { getContacts, saveContact, exportCSV } from "@/lib/contacts";
 import { Contact, ExtractedCard } from "@/lib/types";
+import { getColor } from "@/lib/colors";
 
 type Tab = "scan" | "database" | "settings";
-type ScanState = "idle" | "form";
+type SortOption = "date" | "color" | "urgency" | "az";
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>("scan");
-  const [scanState, setScanState] = useState<ScanState>("idle");
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [extracted, setExtracted] = useState<ExtractedCard | null>(null);
   const [imageDataUrl, setImageDataUrl] = useState("");
   const [contacts, setContacts] = useState<Contact[]>([]);
-  const [webhookUrl, setWebhookUrl] = useState("");
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortOption>("date");
+  const router = useRouter();
+  const supabase = createClient();
 
   useEffect(() => {
-    setContacts(getContacts());
-    setWebhookUrl(localStorage.getItem("cardstack_webhook") || "");
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) router.push("/landing");
+      else { setUser(user); setLoading(false); loadContacts(); }
+    });
   }, []);
+
+  const loadContacts = async () => {
+    const res = await fetch("/api/contacts");
+    if (res.ok) setContacts(await res.json());
+  };
 
   const handleExtracted = useCallback((data: ExtractedCard, imgUrl: string) => {
-    setExtracted(data);
-    setImageDataUrl(imgUrl);
-    setScanState("form");
+    setExtracted(data); setImageDataUrl(imgUrl);
   }, []);
 
-  const handleSaved = useCallback((contact: Contact) => {
-    saveContact(contact);
-    setContacts(getContacts());
-    setScanState("idle");
-    setExtracted(null);
-    setImageDataUrl("");
-    setTab("database");
+  const handleSaved = useCallback(async (contact: Omit<Contact, "id" | "user_id" | "created_at">) => {
+    const res = await fetch("/api/contacts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(contact),
+    });
+    if (res.ok) { await loadContacts(); setExtracted(null); setImageDataUrl(""); setTab("database"); }
   }, []);
 
-  const handleReset = useCallback(() => {
-    setScanState("idle");
-    setExtracted(null);
-    setImageDataUrl("");
+  const handleDeleted = useCallback(async (id: string) => {
+    await fetch("/api/contacts", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    setContacts(c => c.filter(x => x.id !== id));
   }, []);
 
-  const handleWebhookSave = useCallback((url: string) => {
-    setWebhookUrl(url);
-    localStorage.setItem("cardstack_webhook", url);
-  }, []);
+  const handleSignOut = async () => { await supabase.auth.signOut(); router.push("/landing"); };
 
-  const handleDeleted = useCallback(() => {
-    setContacts(getContacts());
-  }, []);
+  const exportCSV = () => {
+    const headers = ["First name","Last name","Title","Company","Email","Phone","Website","LinkedIn","Where met","Follow-up","Notes","Added","Color"];
+    const rows = contacts.map(c => [c.first_name,c.last_name,c.title,c.company,c.email,c.phone,c.website,c.linkedin,c.event,c.follow_up,c.notes,c.added,c.color].map(v => `"${(v||"").replace(/"/g,'""')}"`));
+    const csv = [headers,...rows].map(r => r.join(",")).join("\n");
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "scanbiz-contacts.csv"; a.click();
+  };
 
   const today = new Date().toISOString().split("T")[0];
-  const followUpCount = contacts.filter((c) => c.follow_up && c.follow_up >= today).length;
+  const urgentCount = contacts.filter(c => c.follow_up && c.follow_up <= today).length;
 
-  const filtered = contacts.filter((c) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return [c.first_name, c.last_name, c.company, c.email, c.event]
-      .some((v) => v?.toLowerCase().includes(q));
-  });
+  const sorted = useMemo(() => {
+    let list = contacts.filter(c => {
+      if (!search) return true;
+      const q = search.toLowerCase();
+      return [c.first_name,c.last_name,c.company,c.email,c.event].some(v => v?.toLowerCase().includes(q));
+    });
+    if (sort === "date") return [...list].sort((a, b) => b.added?.localeCompare(a.added || "") || 0);
+    if (sort === "color") return [...list].sort((a, b) => (a.color || "grey").localeCompare(b.color || "grey"));
+    if (sort === "urgency") return [...list].sort((a, b) => { const ua = a.follow_up && a.follow_up <= today ? 0 : 1; const ub = b.follow_up && b.follow_up <= today ? 0 : 1; return ua - ub; });
+    if (sort === "az") return [...list].sort((a, b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`));
+    return list;
+  }, [contacts, search, sort, today]);
+
+  const SORTS: { key: SortOption; label: string }[] = [
+    { key: "date", label: "Date added" },
+    { key: "color", label: "By color" },
+    { key: "urgency", label: "Urgency" },
+    { key: "az", label: "A–Z" },
+  ];
+
+  if (loading) return (
+    <div style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ width: 28, height: 28, borderRadius: "50%", border: "2px solid #1a1714", borderTopColor: "transparent", animation: "spin 0.8s linear infinite" }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+    </div>
+  );
 
   return (
-    <div className="min-h-dvh flex flex-col max-w-md mx-auto">
-      {/* Header */}
-      <header className="flex items-center justify-between px-5 pt-safe pt-6 pb-4 border-b border-[#ece9e4] bg-[#f8f7f5]">
+    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", maxWidth: 480, margin: "0 auto" }}>
+      <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "24px 20px 16px", borderBottom: "0.5px solid #f0ede8" }}>
         <div>
-          <h1 className="text-xl font-display italic text-[#111]">CardStack</h1>
-          <p className="text-[11px] text-[#aaa] mt-0.5">
+          <div style={{ fontSize: 26, fontWeight: 900, color: "#1a1714", letterSpacing: -1, lineHeight: 1 }}>ScanBiz</div>
+          <div style={{ fontSize: 11, color: "#b8b0a6", marginTop: 2 }}>
             {contacts.length} contact{contacts.length !== 1 ? "s" : ""}
-            {followUpCount > 0 ? ` · ${followUpCount} follow-up${followUpCount !== 1 ? "s" : ""}` : ""}
-          </p>
+            {urgentCount > 0 ? ` · ${urgentCount} urgent` : ""}
+          </div>
         </div>
         {tab === "database" && contacts.length > 0 && (
-          <button
-            onClick={() => exportCSV(contacts)}
-            className="text-xs text-[#888] border border-[#ddd] bg-white px-3 py-1.5 rounded-lg hover:border-[#bbb] transition-all"
-          >
+          <button onClick={exportCSV} style={{ fontSize: 11, color: "#888", background: "#f7f5f2", border: "none", padding: "6px 12px", borderRadius: 20, cursor: "pointer", fontWeight: 600 }}>
             Export CSV
           </button>
         )}
       </header>
 
-      {/* Content */}
-      <main className="flex-1 px-5 pb-28 pt-5 overflow-y-auto">
+      <main style={{ flex: 1, padding: "20px 20px 100px", overflowY: "auto" }}>
         {tab === "scan" && (
-          <div>
-            {scanState === "idle" ? (
-              <Scanner onExtracted={handleExtracted} />
-            ) : extracted ? (
-              <ContactForm
-                extracted={extracted}
-                imageDataUrl={imageDataUrl}
-                webhookUrl={webhookUrl}
-                onSaved={handleSaved}
-                onReset={handleReset}
-              />
-            ) : null}
-          </div>
+          !extracted ? <Scanner onExtracted={handleExtracted} /> :
+          <ContactForm extracted={extracted} imageDataUrl={imageDataUrl} onSaved={handleSaved} onReset={() => { setExtracted(null); setImageDataUrl(""); }} />
         )}
 
         {tab === "database" && (
           <div>
-            {contacts.length > 0 && (
-              <input
-                className="field-input mb-4"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search contacts..."
-              />
-            )}
-            {filtered.length === 0 ? (
-              <div className="text-center py-16">
-                <p className="text-4xl mb-4">🪪</p>
-                <p className="text-[#bbb] text-sm">
-                  {contacts.length === 0
-                    ? "No contacts yet — scan your first card"
-                    : "No results found"}
-                </p>
+            <input
+              style={{ width: "100%", background: "#f7f5f2", border: "none", borderRadius: 30, padding: "9px 16px", fontSize: 13, color: "#1a1714", outline: "none", marginBottom: 14, fontFamily: "inherit" }}
+              value={search} onChange={e => setSearch(e.target.value)} placeholder="Search contacts"
+            />
+            <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
+              {SORTS.map(s => (
+                <button key={s.key} onClick={() => setSort(s.key)} style={{
+                  fontSize: 11, fontWeight: 700, padding: "5px 12px", borderRadius: 20, border: "none", cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap",
+                  background: sort === s.key ? "#1a1714" : "#f7f5f2",
+                  color: sort === s.key ? "#fff" : "#888",
+                }}>
+                  {s.label}
+                </button>
+              ))}
+            </div>
+
+            {sorted.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "60px 0", color: "#b8b0a6", fontSize: 14 }}>
+                {contacts.length === 0 ? "No contacts yet — scan your first card" : "No results"}
               </div>
             ) : (
-              <div className="flex flex-col gap-3">
-                {filtered.map((c) => (
-                  <ContactCard key={c.id} contact={c} onDeleted={handleDeleted} />
-                ))}
-              </div>
+              sorted.map(c => <ContactCard key={c.id} contact={c} onDeleted={handleDeleted} />)
             )}
           </div>
         )}
 
         {tab === "settings" && (
-          <Settings webhookUrl={webhookUrl} onSave={handleWebhookSave} />
+          <div className="slide-up">
+            <div style={{ background: "#f7f5f2", borderRadius: 16, padding: 16, marginBottom: 12 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#1a1714", marginBottom: 4 }}>Account</div>
+              <div style={{ fontSize: 12, color: "#b8b0a6", marginBottom: 14 }}>{user?.email}</div>
+              <button onClick={handleSignOut} style={{ width: "100%", padding: "11px 0", borderRadius: 30, background: "#fff", border: "0.5px solid #e0dbd4", fontSize: 13, color: "#666", fontWeight: 600, cursor: "pointer" }}>
+                Sign out
+              </button>
+            </div>
+            <div style={{ background: "#f7f5f2", borderRadius: 16, padding: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#1a1714", marginBottom: 4 }}>About</div>
+              <div style={{ fontSize: 12, color: "#b8b0a6", lineHeight: 1.6 }}>AI-powered business card scanner. Contacts sync across all your devices.</div>
+            </div>
+          </div>
         )}
       </main>
 
-      {/* Bottom nav */}
-      <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#f8f7f5]/95 backdrop-blur border-t border-[#e8e6e2] flex pb-safe">
-        {(["scan", "database", "settings"] as Tab[]).map((t) => {
-          const icons: Record<Tab, string> = { scan: "🪪", database: "🗂", settings: "⚙️" };
-          const labels: Record<Tab, string> = { scan: "Scan", database: "Database", settings: "Settings" };
+      <nav style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 480, margin: "0 auto", background: "rgba(255,255,255,0.96)", backdropFilter: "blur(10px)", borderTop: "0.5px solid #f0ede8", display: "flex", paddingBottom: 12 }}>
+        {(["scan","database","settings"] as Tab[]).map(t => {
+          const icons: Record<Tab, string> = { scan: "ti-scan", database: "ti-address-book", settings: "ti-settings" };
+          const labels: Record<Tab, string> = { scan: "Scan", database: "Contacts", settings: "Settings" };
           return (
-            <button
-              key={t}
-              onClick={() => { setTab(t); if (t === "scan") handleReset(); }}
-              className={`flex-1 flex flex-col items-center gap-1 py-3 text-[10px] transition-colors ${
-                tab === t ? "text-brand" : "text-[#bbb] hover:text-[#888]"
-              }`}
-            >
-              <span className="text-lg leading-none">{icons[t]}</span>
-              {labels[t]}
+            <button key={t} onClick={() => { setTab(t); if (t === "scan") { setExtracted(null); setImageDataUrl(""); } }}
+              style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, paddingTop: 10, background: "none", border: "none", cursor: "pointer", color: tab === t ? "#1a1714" : "#ccc" }}>
+              <i className={`ti ${icons[t]}`} style={{ fontSize: 20 }} aria-hidden="true" />
+              <span style={{ fontSize: 9, fontWeight: tab === t ? 700 : 400 }}>{labels[t]}</span>
             </button>
           );
         })}

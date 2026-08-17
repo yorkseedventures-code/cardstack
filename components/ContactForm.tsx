@@ -2,121 +2,85 @@
 
 import { useState, useEffect } from "react";
 import { Contact, ExtractedCard } from "@/lib/types";
+import { CONTACT_COLORS } from "@/lib/colors";
 
 interface ContactFormProps {
   extracted: ExtractedCard;
   imageDataUrl: string;
-  webhookUrl: string;
-  onSaved: (contact: Contact) => void;
+  onSaved: (contact: Omit<Contact, "id" | "user_id" | "created_at">) => void;
   onReset: () => void;
 }
 
-export default function ContactForm({ extracted, imageDataUrl, webhookUrl, onSaved, onReset }: ContactFormProps) {
-  const [form, setForm] = useState({
-    first_name: extracted.first_name || "",
-    last_name: extracted.last_name || "",
-    title: extracted.title || "",
-    company: extracted.company || "",
-    email: extracted.email || "",
-    phone: extracted.phone || "",
-    website: extracted.website || "",
-    linkedin: extracted.linkedin || "",
-    event: "",
-    follow_up: "",
-    notes: "",
-  });
+export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset }: ContactFormProps) {
+  const [form, setForm] = useState({ ...extracted, event: "", follow_up: "", notes: "", color: "grey" });
   const [saving, setSaving] = useState(false);
-  const [syncStatus, setSyncStatus] = useState<"idle" | "syncing" | "ok" | "error">("idle");
 
-  useEffect(() => {
-    setForm({
-      first_name: extracted.first_name || "",
-      last_name: extracted.last_name || "",
-      title: extracted.title || "",
-      company: extracted.company || "",
-      email: extracted.email || "",
-      phone: extracted.phone || "",
-      website: extracted.website || "",
-      linkedin: extracted.linkedin || "",
-      event: "",
-      follow_up: "",
-      notes: "",
-    });
-  }, [extracted]);
+  useEffect(() => { setForm({ ...extracted, event: "", follow_up: "", notes: "", color: "grey" }); }, [extracted]);
 
   const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setForm((f) => ({ ...f, [key]: e.target.value }));
+    setForm(f => ({ ...f, [key]: e.target.value }));
 
   const handleSave = async () => {
     if (!form.first_name && !form.last_name) return;
     setSaving(true);
-    const contact: Contact = {
-      id: Date.now().toString(),
-      ...form,
-      added: new Date().toISOString().split("T")[0],
-      card_image: imageDataUrl,
-    };
-    if (webhookUrl) {
-      setSyncStatus("syncing");
-      try {
-        const res = await fetch("/api/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contact, webhookUrl }),
-        });
-        setSyncStatus(res.ok ? "ok" : "error");
-      } catch { setSyncStatus("error"); }
-    }
+    await onSaved({ ...form, added: new Date().toISOString().split("T")[0], card_image: imageDataUrl });
     setSaving(false);
-    onSaved(contact);
   };
+
+  const Label = ({ children }: { children: React.ReactNode }) => (
+    <div style={{ fontSize: 8, color: "#b8b0a6", fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: 4 }}>{children}</div>
+  );
 
   return (
     <div className="slide-up">
       {imageDataUrl && (
-        <img src={imageDataUrl} alt="Scanned card" className="w-full max-h-40 object-contain rounded-xl border border-[#e8e6e2] mb-4 bg-white" />
+        <img src={imageDataUrl} alt="Card" style={{ width: "100%", maxHeight: 120, objectFit: "contain", borderRadius: 12, background: "#f7f5f2", marginBottom: 16 }} />
       )}
 
-      <div className="bg-white rounded-2xl border border-[#ece9e4] p-4 mb-4">
-        <p className="text-xs text-[#bbb] font-medium mb-3 uppercase tracking-wider">Extracted info — review & edit</p>
+      <div style={{ marginBottom: 6, fontSize: 10, color: "#b8b0a6", fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>AI filled this in — edit anything</div>
 
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <div><label className="block text-xs text-[#aaa] mb-1.5">First name</label><input className="field-input" value={form.first_name} onChange={set("first_name")} placeholder="—" /></div>
-          <div><label className="block text-xs text-[#aaa] mb-1.5">Last name</label><input className="field-input" value={form.last_name} onChange={set("last_name")} placeholder="—" /></div>
-        </div>
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <div><label className="block text-xs text-[#aaa] mb-1.5">Title</label><input className="field-input" value={form.title} onChange={set("title")} placeholder="—" /></div>
-          <div><label className="block text-xs text-[#aaa] mb-1.5">Company</label><input className="field-input" value={form.company} onChange={set("company")} placeholder="—" /></div>
-        </div>
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <div><label className="block text-xs text-[#aaa] mb-1.5">Email</label><input className="field-input" type="email" value={form.email} onChange={set("email")} placeholder="—" /></div>
-          <div><label className="block text-xs text-[#aaa] mb-1.5">Phone</label><input className="field-input" type="tel" value={form.phone} onChange={set("phone")} placeholder="—" /></div>
-        </div>
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <div><label className="block text-xs text-[#aaa] mb-1.5">LinkedIn</label><input className="field-input" value={form.linkedin} onChange={set("linkedin")} placeholder="linkedin.com/in/..." /></div>
-          <div><label className="block text-xs text-[#aaa] mb-1.5">Website</label><input className="field-input" value={form.website} onChange={set("website")} placeholder="—" /></div>
-        </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+        <div><Label>First name</Label><input className="field-input" value={form.first_name} onChange={set("first_name")} placeholder="—" /></div>
+        <div><Label>Last name</Label><input className="field-input" value={form.last_name} onChange={set("last_name")} placeholder="—" /></div>
+        <div><Label>Title</Label><input className="field-input" value={form.title} onChange={set("title")} placeholder="—" /></div>
+        <div><Label>Company</Label><input className="field-input" value={form.company} onChange={set("company")} placeholder="—" /></div>
+        <div><Label>Email</Label><input className="field-input" type="email" value={form.email} onChange={set("email")} placeholder="—" /></div>
+        <div><Label>Phone</Label><input className="field-input" type="tel" value={form.phone} onChange={set("phone")} placeholder="—" /></div>
+        <div><Label>LinkedIn</Label><input className="field-input" value={form.linkedin} onChange={set("linkedin")} placeholder="—" /></div>
+        <div><Label>Where met</Label><input className="field-input" value={form.event} onChange={set("event")} placeholder="e.g. Slush 2026" /></div>
+      </div>
 
-        <div className="border-t border-[#f0eeeb] pt-3 mt-1">
-          <p className="text-xs text-[#bbb] font-medium mb-3 uppercase tracking-wider">Your context</p>
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <div><label className="block text-xs text-[#aaa] mb-1.5">Where we met</label><input className="field-input" value={form.event} onChange={set("event")} placeholder="e.g. VivaTech Paris" /></div>
-            <div><label className="block text-xs text-[#aaa] mb-1.5">Follow-up date</label><input className="field-input" type="date" value={form.follow_up} onChange={set("follow_up")} /></div>
-          </div>
-          <div><label className="block text-xs text-[#aaa] mb-1.5">Notes</label><textarea className="field-input" value={form.notes} onChange={set("notes")} placeholder="Context, next steps, talking points..." /></div>
+      <div style={{ marginBottom: 10 }}>
+        <Label>Follow-up date</Label>
+        <input className="field-input" type="date" value={form.follow_up} onChange={set("follow_up")} />
+      </div>
+
+      <div style={{ marginBottom: 16 }}>
+        <Label>Notes</Label>
+        <textarea className="field-input" value={form.notes} onChange={set("notes")} placeholder="Context, next steps..." />
+      </div>
+
+      <div style={{ marginBottom: 20 }}>
+        <Label>Pick a color</Label>
+        <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+          {CONTACT_COLORS.map(c => (
+            <button
+              key={c.id}
+              onClick={() => setForm(f => ({ ...f, color: c.id }))}
+              style={{
+                width: 24, height: 24, borderRadius: "50%", background: c.strip,
+                border: form.color === c.id ? "2.5px solid #1a1714" : "2.5px solid transparent",
+                cursor: "pointer", flexShrink: 0
+              }}
+            />
+          ))}
         </div>
       </div>
 
-      {syncStatus === "syncing" && <p className="text-xs text-blue-500 mb-3">Syncing to Google Sheets...</p>}
-      {syncStatus === "ok" && <p className="text-xs text-green-600 mb-3">✓ Synced to Google Sheets</p>}
-      {syncStatus === "error" && <p className="text-xs text-red-500 mb-3">Sheets sync failed — saved locally</p>}
-
-      <div className="flex gap-3">
-        <button onClick={onReset} className="flex-1 py-3 rounded-xl border border-[#ddd] text-[#999] text-sm font-medium hover:border-[#bbb] transition-all bg-white">
-          Scan another
-        </button>
-        <button onClick={handleSave} disabled={saving || (!form.first_name && !form.last_name)} className="flex-[2] py-3 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-          {saving ? "Saving..." : "Save to database"}
+      <div style={{ display: "flex", gap: 10 }}>
+        <button onClick={onReset} style={{ flex: 1, padding: "12px 0", borderRadius: 30, background: "#f7f5f2", border: "none", fontSize: 13, color: "#888", fontWeight: 600, cursor: "pointer" }}>Redo</button>
+        <button onClick={handleSave} disabled={saving || (!form.first_name && !form.last_name)} style={{ flex: 2, padding: "12px 0", borderRadius: 30, background: "#1a1714", border: "none", fontSize: 13, color: "#fff", fontWeight: 700, cursor: "pointer", opacity: (saving || (!form.first_name && !form.last_name)) ? 0.4 : 1 }}>
+          {saving ? "Saving..." : "Save contact"}
         </button>
       </div>
     </div>

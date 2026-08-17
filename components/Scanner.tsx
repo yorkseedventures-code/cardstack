@@ -12,22 +12,19 @@ export default function Scanner({ onExtracted }: ScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-
   const [mode, setMode] = useState<"idle" | "camera" | "processing">("idle");
   const [drag, setDrag] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (mode === "camera" && videoRef.current && streamRef.current) {
-      const video = videoRef.current;
-      video.srcObject = streamRef.current;
-      video.play().catch(() => {});
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => {});
     }
   }, [mode]);
 
   const processImage = useCallback(async (dataUrl: string) => {
     setMode("processing");
-    setError("");
     try {
       const base64 = dataUrl.split(",")[1];
       const mediaType = dataUrl.split(";")[0].split(":")[1];
@@ -36,15 +33,11 @@ export default function Scanner({ onExtracted }: ScannerProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ base64, mediaType }),
       });
-      if (!res.ok) throw new Error("Extraction failed");
       const data = await res.json();
       onExtracted(data, dataUrl);
     } catch {
-      setError("Could not extract — fill in manually");
-      onExtracted({ first_name: "", last_name: "", title: "", company: "", email: "", phone: "", website: "", linkedin: "" }, dataUrl);
-    } finally {
-      setMode("idle");
-    }
+      onExtracted({ first_name:"",last_name:"",title:"",company:"",email:"",phone:"",website:"",linkedin:"" }, dataUrl);
+    } finally { setMode("idle"); }
   }, [onExtracted]);
 
   const handleFile = useCallback((file: File) => {
@@ -54,7 +47,6 @@ export default function Scanner({ onExtracted }: ScannerProps) {
   }, [processImage]);
 
   const startCamera = useCallback(async () => {
-    setError("");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -62,10 +54,7 @@ export default function Scanner({ onExtracted }: ScannerProps) {
       });
       streamRef.current = stream;
       setMode("camera");
-    } catch (err) {
-      console.error("Camera error:", err);
-      setError("Camera not available — use upload instead");
-    }
+    } catch { setError("Camera not available — use upload instead"); }
   }, []);
 
   const capturePhoto = useCallback(() => {
@@ -87,45 +76,41 @@ export default function Scanner({ onExtracted }: ScannerProps) {
     setMode("idle");
   }, []);
 
-  if (mode === "camera") {
-    return (
-      <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "#000" }}>
-        <video ref={videoRef} style={{ width: "100%", height: "100%", objectFit: "cover" }} autoPlay playsInline muted />
-        <canvas ref={canvasRef} className="hidden" />
-        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-          <div style={{ position: "relative", width: "80%", height: "45%" }}>
-            <div style={{ position: "absolute", inset: 0, border: "1.5px solid rgba(255,255,255,0.2)", borderRadius: 16 }} />
-            <div style={{ position: "absolute", top: 0, left: 0, width: 28, height: 28, borderTop: "2px solid #FF0A0A", borderLeft: "2px solid #FF0A0A", borderRadius: "12px 0 0 0" }} />
-            <div style={{ position: "absolute", top: 0, right: 0, width: 28, height: 28, borderTop: "2px solid #FF0A0A", borderRight: "2px solid #FF0A0A", borderRadius: "0 12px 0 0" }} />
-            <div style={{ position: "absolute", bottom: 0, left: 0, width: 28, height: 28, borderBottom: "2px solid #FF0A0A", borderLeft: "2px solid #FF0A0A", borderRadius: "0 0 0 12px" }} />
-            <div style={{ position: "absolute", bottom: 0, right: 0, width: 28, height: 28, borderBottom: "2px solid #FF0A0A", borderRight: "2px solid #FF0A0A", borderRadius: "0 0 12px 0" }} />
-          </div>
-        </div>
-        <p style={{ position: "absolute", top: "18%", left: 0, right: 0, textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: 13 }}>Position card inside the frame</p>
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, paddingBottom: 48, paddingTop: 24, display: "flex", justifyContent: "center", alignItems: "center", gap: 48, background: "linear-gradient(transparent, rgba(0,0,0,0.6))" }}>
-          <button onClick={stopCamera} style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(255,255,255,0.15)", border: "1.5px solid rgba(255,255,255,0.3)", color: "#fff", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
-          <button onClick={capturePhoto} style={{ width: 72, height: 72, borderRadius: "50%", background: "#FF0A0A", border: "4px solid rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <div style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.2)" }} />
-          </button>
-          <div style={{ width: 48 }} />
+  if (mode === "camera") return (
+    <div style={{ position:"fixed",inset:0,zIndex:50,background:"#000" }}>
+      <video ref={videoRef} style={{ width:"100%",height:"100%",objectFit:"cover" }} autoPlay playsInline muted />
+      <canvas ref={canvasRef} className="hidden" />
+      <div style={{ position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none" }}>
+        <div style={{ position:"relative",width:"80%",height:"45%" }}>
+          <div style={{ position:"absolute",inset:0,border:"1.5px solid rgba(255,255,255,0.2)",borderRadius:16 }} />
+          <div style={{ position:"absolute",top:0,left:0,width:28,height:28,borderTop:"2px solid #FF0A0A",borderLeft:"2px solid #FF0A0A",borderRadius:"12px 0 0 0" }} />
+          <div style={{ position:"absolute",top:0,right:0,width:28,height:28,borderTop:"2px solid #FF0A0A",borderRight:"2px solid #FF0A0A",borderRadius:"0 12px 0 0" }} />
+          <div style={{ position:"absolute",bottom:0,left:0,width:28,height:28,borderBottom:"2px solid #FF0A0A",borderLeft:"2px solid #FF0A0A",borderRadius:"0 0 0 12px" }} />
+          <div style={{ position:"absolute",bottom:0,right:0,width:28,height:28,borderBottom:"2px solid #FF0A0A",borderRight:"2px solid #FF0A0A",borderRadius:"0 0 12px 0" }} />
         </div>
       </div>
-    );
-  }
+      <p style={{ position:"absolute",top:"18%",left:0,right:0,textAlign:"center",color:"rgba(255,255,255,0.5)",fontSize:13 }}>Position card inside the frame</p>
+      <div style={{ position:"absolute",bottom:0,left:0,right:0,paddingBottom:48,paddingTop:24,display:"flex",justifyContent:"center",alignItems:"center",gap:48,background:"linear-gradient(transparent,rgba(0,0,0,0.6))" }}>
+        <button onClick={stopCamera} style={{ width:48,height:48,borderRadius:"50%",background:"rgba(255,255,255,0.15)",border:"1.5px solid rgba(255,255,255,0.3)",color:"#fff",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center" }}>✕</button>
+        <button onClick={capturePhoto} style={{ width:72,height:72,borderRadius:"50%",background:"#FF0A0A",border:"4px solid rgba(255,255,255,0.3)",display:"flex",alignItems:"center",justifyContent:"center" }}>
+          <div style={{ width:44,height:44,borderRadius:"50%",background:"rgba(255,255,255,0.2)" }} />
+        </button>
+        <div style={{ width:48 }} />
+      </div>
+    </div>
+  );
 
-  if (mode === "processing") {
-    return (
-      <div className="w-full aspect-[4/3] bg-white rounded-2xl flex flex-col items-center justify-center gap-4 border border-[#e8e6e2]">
-        <div className="relative w-16 h-16">
-          <div className="pulse-ring absolute inset-0 rounded-full border-2 border-brand" />
-          <div className="w-16 h-16 rounded-full border-2 border-brand/30 flex items-center justify-center">
-            <div className="w-6 h-6 rounded-full bg-brand/10 animate-pulse" />
-          </div>
+  if (mode === "processing") return (
+    <div className="w-full aspect-[4/3] bg-white rounded-2xl flex flex-col items-center justify-center gap-4 border border-[#e8e6e2]">
+      <div className="relative w-16 h-16">
+        <div className="pulse-ring absolute inset-0 rounded-full border-2 border-brand" />
+        <div className="w-16 h-16 rounded-full border-2 border-brand/30 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-full bg-brand/10 animate-pulse" />
         </div>
-        <p className="text-sm text-[#aaa] italic">Reading card...</p>
       </div>
-    );
-  }
+      <p className="text-sm text-[#aaa]">Reading card...</p>
+    </div>
+  );
 
   return (
     <div
@@ -142,12 +127,8 @@ export default function Scanner({ onExtracted }: ScannerProps) {
         <p className="text-[#bbb] text-xs">or tap to browse</p>
       </div>
       <div className="flex gap-3">
-        <button className="px-4 py-2 rounded-xl bg-white border border-[#ddd] text-[#888] text-xs font-medium" onClick={(e) => { e.stopPropagation(); fileRef.current?.click(); }}>
-          Upload photo
-        </button>
-        <button className="px-4 py-2 rounded-xl bg-[#fff1f1] border border-red-200 text-red-500 text-xs font-medium" onClick={(e) => { e.stopPropagation(); startCamera(); }}>
-          Use camera
-        </button>
+        <button className="px-4 py-2 rounded-xl bg-white border border-[#ddd] text-[#888] text-xs font-medium" onClick={(e) => { e.stopPropagation(); fileRef.current?.click(); }}>Upload photo</button>
+        <button className="px-4 py-2 rounded-xl bg-[#fff1f1] border border-red-200 text-red-500 text-xs font-medium" onClick={(e) => { e.stopPropagation(); startCamera(); }}>Use camera</button>
       </div>
       {error && <p className="text-red-500 text-xs text-center px-4">{error}</p>}
     </div>
