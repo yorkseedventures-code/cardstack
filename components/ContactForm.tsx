@@ -8,16 +8,17 @@ import { savePhotoToDevice, SavePhotoResult } from "@/lib/savePhoto";
 interface ContactFormProps {
   extracted: ExtractedCard;
   imageDataUrl: string;
-  onSaved: (contact: Omit<Contact, "id" | "user_id" | "created_at">) => void;
+  onSaved: (contact: Omit<Contact, "id" | "user_id" | "created_at">) => Promise<void>;
   onReset: () => void;
 }
 
 export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset }: ContactFormProps) {
   const [form, setForm] = useState({ ...extracted, event: "", follow_up: "", notes: "", color: "grey" });
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [photoSave, setPhotoSave] = useState<"idle" | "saving" | SavePhotoResult>("idle");
 
-  useEffect(() => { setForm({ ...extracted, event: "", follow_up: "", notes: "", color: "grey" }); setPhotoSave("idle"); }, [extracted]);
+  useEffect(() => { setForm({ ...extracted, event: "", follow_up: "", notes: "", color: "grey" }); setPhotoSave("idle"); setError(null); }, [extracted]);
 
   const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [key]: e.target.value }));
@@ -25,12 +26,18 @@ export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset 
   const handleSave = async () => {
     if (!form.first_name && !form.last_name) return;
     setSaving(true);
+    setError(null);
     // Note: we intentionally don't persist the card photo itself — storing base64 images
     // directly in the database rows would blow past Supabase's free-tier 500MB database
     // size limit after only a few hundred/thousand scans. The photo is only used to help
     // fill out this form; once saved, just the extracted text fields are kept.
-    await onSaved({ ...form, added: new Date().toISOString().split("T")[0] });
-    setSaving(false);
+    try {
+      await onSaved({ ...form, added: new Date().toISOString().split("T")[0] });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't save contact. Try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSavePhoto = async () => {
@@ -111,6 +118,12 @@ export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset 
           ))}
         </div>
       </div>
+
+      {error && (
+        <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 10, background: "#fff1f1", color: "#c0392b", fontSize: 12, lineHeight: 1.5 }}>
+          {error}
+        </div>
+      )}
 
       <div style={{ display: "flex", gap: 10 }}>
         <button onClick={onReset} style={{ flex: 1, padding: "12px 0", borderRadius: 30, background: "#f7f5f2", border: "none", fontSize: 13, color: "#888", fontWeight: 600, cursor: "pointer" }}>Redo</button>

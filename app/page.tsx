@@ -46,7 +46,13 @@ export default function Home() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(contact),
     });
-    if (res.ok) { await loadContacts(); setExtracted(null); setImageDataUrl(""); setTab("database"); }
+    if (res.ok) {
+      await loadContacts(); setExtracted(null); setImageDataUrl(""); setTab("database");
+    } else {
+      const body = await res.json().catch(() => ({}));
+      console.error("Failed to save contact:", res.status, body);
+      throw new Error(body.error || `Save failed (${res.status})`);
+    }
   }, []);
 
   const handleDeleted = useCallback(async (id: string) => {

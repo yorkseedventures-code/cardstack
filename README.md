@@ -5,13 +5,14 @@ AI-powered business card scanner PWA. Scan cards with your camera or upload phot
 ## Features
 
 - 📷 Camera capture (direct on mobile) or photo upload
-- 🤖 AI extraction via Claude Vision (name, title, company, email, phone, LinkedIn, website)
+- 🤖 AI extraction via GPT-4o Vision (name, title, company, email, phone, LinkedIn, website)
 - 📝 Editable form — review before saving
 - 🗂 Local contact database with search
 - 📅 Follow-up date tracking
 - 📤 CSV export for Google Sheets
 - 🔄 Auto-sync to Google Sheets via Make.com webhook
 - 📱 PWA — installable on iPhone/Android home screen
+- 🔒 Privacy Policy & Terms pages — we don't use, sell, or look at your data
 
 ---
 
@@ -23,15 +24,15 @@ AI-powered business card scanner PWA. Scan cards with your camera or upload phot
 npm install
 ```
 
-### 2. Add your Anthropic API key
+### 2. Add your OpenAI API key
 
 Create `.env.local`:
 
 ```
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-Get your key at [console.anthropic.com](https://console.anthropic.com).
+Get your key at [platform.openai.com](https://platform.openai.com). This powers the GPT-4o vision extraction in `app/api/extract/route.ts`.
 
 ### 3. Run locally
 
@@ -49,7 +50,7 @@ Open [http://localhost:3000](http://localhost:3000).
 npx vercel
 ```
 
-Add `ANTHROPIC_API_KEY` as an environment variable in your Vercel project settings.
+Add `OPENAI_API_KEY` as an environment variable in your Vercel project settings.
 
 ---
 
@@ -84,7 +85,7 @@ cardstack/
 │   ├── layout.tsx            # Root layout + fonts + PWA meta
 │   ├── globals.css           # Global styles
 │   └── api/
-│       ├── extract/route.ts  # Claude Vision extraction endpoint
+│       ├── extract/route.ts  # GPT-4o Vision extraction endpoint
 │       └── sync/route.ts     # Google Sheets webhook proxy
 ├── components/
 │   ├── Scanner.tsx           # Camera + file upload

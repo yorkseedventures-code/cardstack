@@ -1,9 +1,69 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+const HOW_IT_WORKS = [
+  {
+    step: "1",
+    title: "Scan or upload a card",
+    body: "Point your camera at a business card, or upload a photo from your library.",
+  },
+  {
+    step: "2",
+    title: "AI reads the details",
+    body: "Name, title, company, email, phone, LinkedIn, and website are extracted automatically.",
+  },
+  {
+    step: "3",
+    title: "Review and save",
+    body: "Double-check the info, add notes or a follow-up date, then save it to your contact list.",
+  },
+  {
+    step: "4",
+    title: "Sync anywhere",
+    body: "Export to CSV or auto-sync every new contact straight to a Google Sheet.",
+  },
+];
+
+const FAQ = [
+  {
+    q: "Who is this for?",
+    a: "Anyone who collects business cards — founders, investors, sales teams, freelancers, students at career fairs, or anyone tired of typing contact info by hand.",
+  },
+  {
+    q: "Do I need to create an account?",
+    a: "Yes, a quick free sign-up gets you started. No credit card required.",
+  },
+  {
+    q: "How accurate is the AI extraction?",
+    a: "It's very accurate for standard business cards, but you'll always get a chance to review and edit the details before saving, so nothing goes in wrong.",
+  },
+  {
+    q: "Can I use it without a camera, like on desktop?",
+    a: "Yes — you can upload a photo of a card instead of scanning live with your camera.",
+  },
+  {
+    q: "Where are my contacts stored?",
+    a: "Your contacts are saved to your personal database and are only visible to you.",
+  },
+  {
+    q: "Can I export my contacts?",
+    a: "Yes, you can export everything to CSV at any time, or connect Google Sheets in Settings for automatic syncing of every new contact.",
+  },
+  {
+    q: "Does it work on my phone?",
+    a: "Yes — it's a PWA, so you can add it to your home screen on iPhone or Android and it behaves like a native app with full camera access.",
+  },
+  {
+    q: "Is there a cost?",
+    a: "You can get started for free with no credit card required.",
+  },
+];
 
 export default function LandingPage() {
   const router = useRouter();
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
     <div className="min-h-dvh bg-[#f8f7f5] flex flex-col">
@@ -21,7 +81,7 @@ export default function LandingPage() {
       {/* Hero */}
       <main className="flex-1 flex flex-col items-center justify-center px-6 text-center max-w-2xl mx-auto w-full">
         <div className="inline-flex items-center gap-2 bg-[#fff1f1] border border-brand/20 rounded-full px-3 py-1.5 text-xs text-brand font-medium mb-6">
-          Built for founders and investors
+          Built for anyone
         </div>
 
         <h1 className="text-4xl font-bold text-[#111] leading-tight mb-4">
@@ -55,9 +115,94 @@ export default function LandingPage() {
         </div>
       </main>
 
+      {/* How it works */}
+      <section className="px-6 py-16 max-w-2xl mx-auto w-full">
+        <h2 className="text-2xl font-bold text-[#111] text-center mb-2">
+          How it works
+        </h2>
+        <p className="text-[#888] text-sm text-center mb-10">
+          From card to contact in four quick steps.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {HOW_IT_WORKS.map((s) => (
+            <div
+              key={s.step}
+              className="bg-white border border-[#ece9e4] rounded-xl p-5"
+            >
+              <div className="w-7 h-7 rounded-full bg-brand/10 text-brand text-xs font-bold flex items-center justify-center mb-3">
+                {s.step}
+              </div>
+              <h3 className="text-sm font-semibold text-[#111] mb-1">
+                {s.title}
+              </h3>
+              <p className="text-xs text-[#888] leading-relaxed">{s.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="px-6 py-16 max-w-2xl mx-auto w-full">
+        <h2 className="text-2xl font-bold text-[#111] text-center mb-2">
+          FAQ
+        </h2>
+        <p className="text-[#888] text-sm text-center mb-10">
+          Everything else you might want to know.
+        </p>
+
+        <div className="flex flex-col gap-2">
+          {FAQ.map((item, i) => {
+            const isOpen = openFaq === i;
+            return (
+              <div
+                key={item.q}
+                className="bg-white border border-[#ece9e4] rounded-xl overflow-hidden"
+              >
+                <button
+                  onClick={() => setOpenFaq(isOpen ? null : i)}
+                  className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
+                >
+                  <span className="text-sm font-medium text-[#111]">
+                    {item.q}
+                  </span>
+                  <span
+                    className={`text-[#bbb] text-lg leading-none transition-transform ${
+                      isOpen ? "rotate-45" : ""
+                    }`}
+                  >
+                    +
+                  </span>
+                </button>
+                {isOpen && (
+                  <p className="px-5 pb-4 text-xs text-[#888] leading-relaxed">
+                    {item.a}
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer className="text-center py-6 text-xs text-[#ccc]">
-        A Yorkseed product
+      <footer className="flex flex-col items-center gap-2 text-center py-6 text-xs text-[#ccc]">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.push("/privacy")}
+            className="hover:text-[#888] transition-colors"
+          >
+            Privacy Policy
+          </button>
+          <span className="text-[#ddd]">·</span>
+          <button
+            onClick={() => router.push("/terms")}
+            className="hover:text-[#888] transition-colors"
+          >
+            Terms & Conditions
+          </button>
+        </div>
+        <span>A Yorkseed product</span>
       </footer>
     </div>
   );
