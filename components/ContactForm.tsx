@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Contact, ExtractedCard } from "@/lib/types";
 import { CONTACT_COLORS } from "@/lib/colors";
+import { savePhotoToDevice, SavePhotoResult } from "@/lib/savePhoto";
 
 interface ContactFormProps {
   extracted: ExtractedCard;
@@ -14,8 +15,9 @@ interface ContactFormProps {
 export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset }: ContactFormProps) {
   const [form, setForm] = useState({ ...extracted, event: "", follow_up: "", notes: "", color: "grey" });
   const [saving, setSaving] = useState(false);
+  const [photoSave, setPhotoSave] = useState<"idle" | "saving" | SavePhotoResult>("idle");
 
-  useEffect(() => { setForm({ ...extracted, event: "", follow_up: "", notes: "", color: "grey" }); }, [extracted]);
+  useEffect(() => { setForm({ ...extracted, event: "", follow_up: "", notes: "", color: "grey" }); setPhotoSave("idle"); }, [extracted]);
 
   const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [key]: e.target.value }));
@@ -23,8 +25,21 @@ export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset 
   const handleSave = async () => {
     if (!form.first_name && !form.last_name) return;
     setSaving(true);
-    await onSaved({ ...form, added: new Date().toISOString().split("T")[0], card_image: imageDataUrl });
+    // Note: we intentionally don't persist the card photo itself — storing base64 images
+    // directly in the database rows would blow past Supabase's free-tier 500MB database
+    // size limit after only a few hundred/thousand scans. The photo is only used to help
+    // fill out this form; once saved, just the extracted text fields are kept.
+    await onSaved({ ...form, added: new Date().toISOString().split("T")[0] });
     setSaving(false);
+  };
+
+  const handleSavePhoto = async () => {
+    setPhotoSave("saving");
+    const namePart = `${form.first_name}-${form.last_name}`.trim().replace(/^-|-$/g, "").replace(/\s+/g, "-").toLowerCase();
+    const filename = `${namePart || "business-card"}.jpg`;
+    const result = await savePhotoToDevice(imageDataUrl, filename);
+    setPhotoSave(result);
+    if (result !== "unsupported") setTimeout(() => setPhotoSave("idle"), 2500);
   };
 
   const Label = ({ children }: { children: React.ReactNode }) => (
@@ -34,7 +49,25 @@ export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset 
   return (
     <div className="slide-up">
       {imageDataUrl && (
-        <img src={imageDataUrl} alt="Card" style={{ width: "100%", maxHeight: 120, objectFit: "contain", borderRadius: 12, background: "#f7f5f2", marginBottom: 16 }} />
+        <div style={{ position: "relative", marginBottom: 16 }}>
+          <img src={imageDataUrl} alt="Card" style={{ width: "100%", maxHeight: 120, objectFit: "contain", borderRadius: 12, background: "#f7f5f2" }} />
+          <button
+            onClick={handleSavePhoto}
+            disabled={photoSave === "saving"}
+            style={{
+              position: "absolute", top: 8, right: 8, padding: "6px 10px", borderRadius: 20,
+              background: "rgba(26,23,20,0.75)", border: "none", color: "#fff", fontSize: 10, fontWeight: 600,
+              cursor: photoSave === "saving" ? "default" : "pointer", backdropFilter: "blur(4px)",
+            }}
+          >
+            {photoSave === "saving" && "Saving..."}
+            {photoSave === "shared" && "Saved ✓"}
+            {photoSave === "downloaded" && "Downloaded ✓"}
+            {photoSave === "cancelled" && "Cancelled"}
+            {photoSave === "unsupported" && "Save failed"}
+            {photoSave === "idle" && "⬇ Save to Photos"}
+          </button>
+        </div>
       )}
 
       <div style={{ marginBottom: 6, fontSize: 10, color: "#b8b0a6", fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>AI filled this in — edit anything</div>
@@ -46,7 +79,9 @@ export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset 
         <div><Label>Company</Label><input className="field-input" value={form.company} onChange={set("company")} placeholder="—" /></div>
         <div><Label>Email</Label><input className="field-input" type="email" value={form.email} onChange={set("email")} placeholder="—" /></div>
         <div><Label>Phone</Label><input className="field-input" type="tel" value={form.phone} onChange={set("phone")} placeholder="—" /></div>
+        <div><Label>Phone 2</Label><input className="field-input" type="tel" value={form.phone2} onChange={set("phone2")} placeholder="—" /></div>
         <div><Label>LinkedIn</Label><input className="field-input" value={form.linkedin} onChange={set("linkedin")} placeholder="—" /></div>
+        <div><Label>Website</Label><input className="field-input" value={form.website} onChange={set("website")} placeholder="—" /></div>
         <div><Label>Where met</Label><input className="field-input" value={form.event} onChange={set("event")} placeholder="e.g. Slush 2026" /></div>
       </div>
 

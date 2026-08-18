@@ -33,6 +33,7 @@ export default function ContactCard({ contact, onDeleted }: { contact: Contact; 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 12, marginBottom: 10 }}>
             {contact.email && <a href={`mailto:${contact.email}`} style={{ color: "#1a1714", textDecoration: "none" }}>✉ {contact.email}</a>}
             {contact.phone && <a href={`tel:${contact.phone}`} style={{ color: "#1a1714", textDecoration: "none" }}>✆ {contact.phone}</a>}
+            {contact.phone2 && <a href={`tel:${contact.phone2}`} style={{ color: "#1a1714", textDecoration: "none" }}>✆ {contact.phone2}</a>}
             {contact.linkedin && <a href={contact.linkedin.startsWith("http") ? contact.linkedin : `https://${contact.linkedin}`} target="_blank" rel="noopener noreferrer" style={{ color: "#3b82f6", textDecoration: "none" }}>in LinkedIn</a>}
             {contact.website && <a href={contact.website.startsWith("http") ? contact.website : `https://${contact.website}`} target="_blank" rel="noopener noreferrer" style={{ color: "#1a1714", textDecoration: "none" }}>↗ {contact.website}</a>}
           </div>

@@ -2,6 +2,7 @@
 
 import { useRef, useState, useCallback, useEffect } from "react";
 import { ExtractedCard } from "@/lib/types";
+import { decodeQRFromDataUrl, decodeQRFromCanvas, extractFromQRText } from "@/lib/qr";
 
 interface ScannerProps {
   onExtracted: (data: ExtractedCard, imageDataUrl: string) => void;
@@ -23,20 +24,32 @@ export default function Scanner({ onExtracted }: ScannerProps) {
     }
   }, [mode]);
 
-  const processImage = useCallback(async (dataUrl: string) => {
+  const emptyCard: ExtractedCard = { first_name:"",last_name:"",title:"",company:"",email:"",phone:"",phone2:"",website:"",linkedin:"" };
+
+  const processImage = useCallback(async (dataUrl: string, preDecodedQrText?: string | null) => {
     setMode("processing");
     try {
       const base64 = dataUrl.split(",")[1];
       const mediaType = dataUrl.split(";")[0].split(":")[1];
+      // Business cards that are ONLY a QR code have nothing for the AI to read visually,
+      // so we decode the QR ourselves (jsQR runs entirely client-side) and pass the raw
+      // decoded text + whatever structured fields we could parse from it (vCard/MECARD/URL).
+      const qrText = preDecodedQrText !== undefined ? preDecodedQrText : await decodeQRFromDataUrl(dataUrl);
+      const qrFields = qrText ? extractFromQRText(qrText) : {};
+
       const res = await fetch("/api/extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ base64, mediaType }),
+        body: JSON.stringify({ base64, mediaType, qrText }),
       });
-      const data = await res.json();
-      onExtracted(data, dataUrl);
+      const aiData = await res.json();
+
+      // QR-decoded fields are exact (machine-encoded), so they take priority over the
+      // AI's visual OCR guess wherever the QR actually gave us a value.
+      const merged: ExtractedCard = { ...emptyCard, ...aiData, ...Object.fromEntries(Object.entries(qrFields).filter(([, v]) => v)) };
+      onExtracted(merged, dataUrl);
     } catch {
-      onExtracted({ first_name:"",last_name:"",title:"",company:"",email:"",phone:"",website:"",linkedin:"" }, dataUrl);
+      onExtracted(emptyCard, dataUrl);
     } finally { setMode("idle"); }
   }, [onExtracted]);
 
@@ -64,10 +77,11 @@ export default function Scanner({ onExtracted }: ScannerProps) {
     c.width = v.videoWidth || 1280;
     c.height = v.videoHeight || 720;
     c.getContext("2d")?.drawImage(v, 0, 0);
+    const qrText = decodeQRFromCanvas(c);
     const dataUrl = c.toDataURL("image/jpeg", 0.9);
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
-    processImage(dataUrl);
+    processImage(dataUrl, qrText);
   }, [processImage]);
 
   const stopCamera = useCallback(() => {

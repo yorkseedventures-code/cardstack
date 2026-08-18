@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
       company: contact.company,
       email: contact.email,
       phone: contact.phone,
+      phone2: contact.phone2,
       website: contact.website,
       linkedin: contact.linkedin,
       event: contact.event,
