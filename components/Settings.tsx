@@ -42,7 +42,7 @@ export default function Settings({ webhookUrl, onSave }: SettingsProps) {
       <div className="bg-white rounded-2xl border border-[#ece9e4] p-4">
         <h3 className="text-sm font-medium text-[#111] mb-1">About CardStack</h3>
         <p className="text-xs text-[#aaa] leading-relaxed">
-          AI-powered business card scanner. Photos are sent to OpenAI for extraction — nothing is stored server-side. All contacts are saved in your browser.
+          AI-powered business card scanner. Photos are sent to OpenAI for extraction, and nothing is stored server-side. All contacts are saved in your browser.
         </p>
       </div>
     </div>

@@ -1,7 +1,7 @@
 export type SavePhotoResult = "shared" | "downloaded" | "cancelled" | "unsupported";
 
 /**
- * Lets the user save a photo to their own device — nothing is uploaded to our servers.
+ * Lets the user save a photo to their own device nothing is uploaded to our servers.
  *
  * Web apps can't request OS-level "photo library" access the way a native app can. The
  * standard mechanism is the Web Share API: it opens the device's native share sheet, and
@@ -20,7 +20,7 @@ export async function savePhotoToDevice(dataUrl: string, filename = "business-ca
         await navigator.share({ files: [file] });
         return "shared";
       } catch (err) {
-        // AbortError just means the user closed the share sheet without picking anything —
+        // AbortError just means the user closed the share sheet without picking anything.
         // not a real failure.
         if (err instanceof DOMException && err.name === "AbortError") return "cancelled";
         throw err;

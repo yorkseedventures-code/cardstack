@@ -142,7 +142,7 @@ export default function Home() {
 
             {sorted.length === 0 ? (
               <div style={{ textAlign: "center", padding: "60px 0", color: "#b8b0a6", fontSize: 14 }}>
-                {contacts.length === 0 ? "No contacts yet — scan your first card" : "No results"}
+                {contacts.length === 0 ? "No contacts yet. Scan your first card" : "No results"}
               </div>
             ) : (
               sorted.map(c => <ContactCard key={c.id} contact={c} onDeleted={handleDeleted} />)

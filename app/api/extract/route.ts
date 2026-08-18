@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     if (!base64 || !mediaType) return NextResponse.json({ error: "Missing image" }, { status: 400 });
 
     const qrNote = qrText
-      ? ` This card also has a QR code, already decoded (client-side) to this raw text: ${JSON.stringify(qrText)}. Note that vision models cannot reliably decode QR codes visually — this text was extracted separately and is exact. If the card's only content is the QR code (nothing else visible), use this decoded text to fill in whatever fields it implies (e.g. a name, phone, email, or URL) instead of leaving everything blank. If it's a plain URL and no other field points elsewhere, put it in "website" (or "linkedin" if it's a linkedin.com URL).`
+      ? ` This card also has a QR code, already decoded (client-side) to this raw text: ${JSON.stringify(qrText)}. Note that vision models cannot reliably decode QR codes visually. This text was extracted separately and is exact. If the card's only content is the QR code (nothing else visible), use this decoded text to fill in whatever fields it implies (e.g. a name, phone, email, or URL) instead of leaving everything blank. If it's a plain URL and no other field points elsewhere, put it in "website" (or "linkedin" if it's a linkedin.com URL).`
       : "";
 
     const response = await client.chat.completions.create({

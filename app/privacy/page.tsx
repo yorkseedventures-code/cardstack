@@ -86,7 +86,7 @@ export default function PrivacyPage() {
               If you connect Google Sheets syncing in Settings, the contact
               rows you choose to sync are sent to the webhook URL you
               provide. That connection is entirely opt-in and controlled by
-              you — nothing syncs unless you set it up.
+              you. Nothing syncs unless you set it up.
             </p>
           </section>
 

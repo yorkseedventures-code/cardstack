@@ -26,10 +26,45 @@ const HOW_IT_WORKS = [
   },
 ];
 
+const PLANS = [
+  {
+    id: "free",
+    name: "Free",
+    price: "$0",
+    period: "",
+    tagline: "Try it out",
+    features: ["20 scans / month", "Editable AI extraction", "CSV export", "Personal contact list"],
+    cta: "Get started free",
+    highlight: false,
+  },
+  {
+    id: "event",
+    name: "Event Pass",
+    price: "$4.99",
+    period: "one-time",
+    tagline: "Unlimited scans for 4 days",
+    features: ["Unlimited scans for 4 days", "Perfect for a single conference", "Everything in Free", "No subscription"],
+    cta: "Get Event Pass",
+    highlight: true,
+    badge: "For conferences",
+    giftable: true,
+  },
+  {
+    id: "pro",
+    name: "Pro",
+    price: "$6.99",
+    period: "/ month",
+    tagline: "For ongoing networking",
+    features: ["Unlimited scans, every month", "Google Sheets auto-sync", "Priority extraction", "Cancel anytime"],
+    cta: "Go Pro",
+    highlight: false,
+  },
+];
+
 const FAQ = [
   {
     q: "Who is this for?",
-    a: "Anyone who collects business cards — founders, investors, sales teams, freelancers, students at career fairs, or anyone tired of typing contact info by hand.",
+    a: "It's for anyone who collects business cards. Conference and event goers who pick up a stack of cards in a day, sales teams following up on leads, founders and investors meeting new people, freelancers, and anyone who's tired of typing contact info in by hand.",
   },
   {
     q: "Do I need to create an account?",
@@ -41,7 +76,7 @@ const FAQ = [
   },
   {
     q: "Can I use it without a camera, like on desktop?",
-    a: "Yes — you can upload a photo of a card instead of scanning live with your camera.",
+    a: "Yes, you can upload a photo of a card instead of scanning live with your camera.",
   },
   {
     q: "Where are my contacts stored?",
@@ -53,17 +88,23 @@ const FAQ = [
   },
   {
     q: "Does it work on my phone?",
-    a: "Yes — it's a PWA, so you can add it to your home screen on iPhone or Android and it behaves like a native app with full camera access.",
+    a: "Yes, it's a PWA, so you can add it to your home screen on iPhone or Android and it behaves like a native app with full camera access.",
   },
   {
     q: "Is there a cost?",
-    a: "You can get started for free with no credit card required.",
+    a: "You can get started for free with 20 scans a month, no credit card required. Heading to a conference? The Event Pass gives you unlimited scans for 4 days for $4.99. Or go Pro for $6.99/month for unlimited scans all the time.",
+  },
+  {
+    q: "Can I gift the Event Pass to a friend?",
+    a: "Yes. On the Event Pass, choose \"Gift to a friend,\" enter their email, and they'll get unlimited scanning for 4 days on their own account.",
   },
 ];
 
 export default function LandingPage() {
   const router = useRouter();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [giftMode, setGiftMode] = useState(false);
+  const [giftEmail, setGiftEmail] = useState("");
 
   return (
     <div className="min-h-dvh bg-[#f8f7f5] flex flex-col">
@@ -137,6 +178,87 @@ export default function LandingPage() {
                 {s.title}
               </h3>
               <p className="text-xs text-[#888] leading-relaxed">{s.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section className="px-6 py-16 max-w-2xl mx-auto w-full">
+        <h2 className="text-2xl font-bold text-[#111] text-center mb-2">
+          Pricing
+        </h2>
+        <p className="text-[#888] text-sm text-center mb-10">
+          Start free. Upgrade when you need more scans.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
+          {PLANS.map((plan) => (
+            <div
+              key={plan.id}
+              className={`relative rounded-xl p-5 flex flex-col h-full ${
+                plan.highlight
+                  ? "bg-white border-2 border-brand shadow-sm"
+                  : "bg-white border border-[#ece9e4]"
+              }`}
+            >
+              {plan.badge && (
+                <span className="absolute -top-3 left-5 bg-brand text-white text-[10px] font-semibold px-2.5 py-1 rounded-full">
+                  {plan.badge}
+                </span>
+              )}
+
+              <h3 className="text-sm font-semibold text-[#111] mb-1">
+                {plan.name}
+              </h3>
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-2xl font-bold text-[#111]">{plan.price}</span>
+                {plan.period && (
+                  <span className="text-xs text-[#888]">{plan.period}</span>
+                )}
+              </div>
+              <p className="text-xs text-[#888] mb-4">{plan.tagline}</p>
+
+              <ul className="flex flex-col gap-2 mb-5 flex-1">
+                {plan.features.map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-xs text-[#666]">
+                    <span className="text-brand mt-0.5">✓</span>
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {plan.giftable && (
+                <div className="mb-4">
+                  <button
+                    onClick={() => setGiftMode((v) => !v)}
+                    className="w-full flex items-center justify-between text-xs font-medium text-[#666] bg-[#f7f5f2] rounded-lg px-3 py-2 mb-2"
+                  >
+                    <span>🎁 Gift to a friend</span>
+                    <span className="text-[#bbb]">{giftMode ? "−" : "+"}</span>
+                  </button>
+                  {giftMode && (
+                    <input
+                      type="email"
+                      value={giftEmail}
+                      onChange={(e) => setGiftEmail(e.target.value)}
+                      placeholder="Friend's email"
+                      className="w-full bg-[#f7f5f2] border-none rounded-lg px-3 py-2 text-xs text-[#111] outline-none placeholder:text-[#bbb]"
+                    />
+                  )}
+                </div>
+              )}
+
+              <button
+                onClick={() => router.push("/auth")}
+                className={`w-full py-2.5 rounded-lg text-xs font-medium transition-all ${
+                  plan.highlight
+                    ? "bg-brand text-white hover:bg-brand/90"
+                    : "bg-[#f7f5f2] text-[#111] hover:bg-[#ece9e4]"
+                }`}
+              >
+                {plan.giftable && giftMode ? "Send gift" : plan.cta}
+              </button>
             </div>
           ))}
         </div>

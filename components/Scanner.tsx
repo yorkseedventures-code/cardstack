@@ -67,7 +67,7 @@ export default function Scanner({ onExtracted }: ScannerProps) {
       });
       streamRef.current = stream;
       setMode("camera");
-    } catch { setError("Camera not available — use upload instead"); }
+    } catch { setError("Camera not available. Use upload instead."); }
   }, []);
 
   const capturePhoto = useCallback(() => {

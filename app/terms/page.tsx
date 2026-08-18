@@ -107,7 +107,7 @@ export default function TermsPage() {
               >
                 Privacy Policy
               </button>{" "}
-              for details on how your data is handled — in short, we
+              for details on how your data is handled. In short, we
               don&apos;t use or look at it.
             </p>
           </section>

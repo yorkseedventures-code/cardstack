@@ -1,18 +1,18 @@
 # CardStack
 
-AI-powered business card scanner PWA. Scan cards with your camera or upload photos — Claude extracts contact info, you review it, and it saves to a local database with optional Google Sheets sync.
+AI-powered business card scanner PWA. Scan cards with your camera or upload photos. Claude extracts contact info, you review it, and it saves to a local database with optional Google Sheets sync.
 
 ## Features
 
 - 📷 Camera capture (direct on mobile) or photo upload
 - 🤖 AI extraction via GPT-4o Vision (name, title, company, email, phone, LinkedIn, website)
-- 📝 Editable form — review before saving
+- 📝 Editable form, review before saving
 - 🗂 Local contact database with search
 - 📅 Follow-up date tracking
 - 📤 CSV export for Google Sheets
 - 🔄 Auto-sync to Google Sheets via Make.com webhook
-- 📱 PWA — installable on iPhone/Android home screen
-- 🔒 Privacy Policy & Terms pages — we don't use, sell, or look at your data
+- 📱 PWA, installable on iPhone/Android home screen
+- 🔒 Privacy Policy & Terms pages we don't use, sell, or look at your data
 
 ---
 
@@ -72,7 +72,7 @@ Add `OPENAI_API_KEY` as an environment variable in your Vercel project settings.
 
 1. Open the app in Safari
 2. Tap the Share button → **Add to Home Screen**
-3. Launch from your home screen — it behaves like a native app with camera access
+3. Launch from your home screen it behaves like a native app with camera access
 
 ---
 
