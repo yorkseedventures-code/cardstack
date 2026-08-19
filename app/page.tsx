@@ -139,7 +139,8 @@ export default function Home() {
   };
 
   const today = new Date().toISOString().split("T")[0];
-  const urgentCount = contacts.filter(c => c.follow_up && c.follow_up <= today).length;
+  const isUrgent = (c: Contact) => !!c.urgent || (!!c.follow_up && c.follow_up <= today);
+  const urgentCount = contacts.filter(isUrgent).length;
 
   const sorted = useMemo(() => {
     let list = contacts.filter(c => {
@@ -149,7 +150,7 @@ export default function Home() {
     });
     if (sort === "date") return [...list].sort((a, b) => b.added?.localeCompare(a.added || "") || 0);
     if (sort === "color") return [...list].sort((a, b) => (a.color || "grey").localeCompare(b.color || "grey"));
-    if (sort === "urgency") return [...list].sort((a, b) => { const ua = a.follow_up && a.follow_up <= today ? 0 : 1; const ub = b.follow_up && b.follow_up <= today ? 0 : 1; return ua - ub; });
+    if (sort === "urgency") return [...list].sort((a, b) => { const ua = isUrgent(a) ? 0 : 1; const ub = isUrgent(b) ? 0 : 1; return ua - ub; });
     if (sort === "az") return [...list].sort((a, b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`));
     return list;
   }, [contacts, search, sort, today]);

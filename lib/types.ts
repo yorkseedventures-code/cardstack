@@ -15,6 +15,7 @@ export interface Contact {
   notes: string;
   added: string;
   color: string;
+  urgent?: boolean;
   card_image?: string;
   created_at?: string;
 }

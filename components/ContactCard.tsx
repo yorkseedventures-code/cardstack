@@ -26,7 +26,8 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
   const [form, setForm] = useState<Partial<Contact>>(contact);
   const color = getColor(contact.color || "grey");
   const today = new Date().toISOString().split("T")[0];
-  const urgent = contact.follow_up && contact.follow_up <= today;
+  const dateUrgent = !!contact.follow_up && contact.follow_up <= today;
+  const urgent = !!contact.urgent || dateUrgent;
 
   const startEditing = () => { setForm(contact); setEditing(true); };
   const cancelEditing = () => { setForm(contact); setEditing(false); };
@@ -37,6 +38,7 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
     for (const f of EDIT_FIELDS) {
       if ((form[f.key] ?? "") !== (contact[f.key] ?? "")) (changed as any)[f.key] = form[f.key] ?? "";
     }
+    if (!!form.urgent !== !!contact.urgent) changed.urgent = !!form.urgent;
     const ok = Object.keys(changed).length === 0 ? true : await onEdited(contact.id, changed);
     setSaving(false);
     if (ok) setEditing(false);
@@ -71,7 +73,10 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
                 {contact.website && <a href={contact.website.startsWith("http") ? contact.website : `https://${contact.website}`} target="_blank" rel="noopener noreferrer" style={{ color: "#1a1714", textDecoration: "none" }}>↗ {contact.website}</a>}
               </div>
               {contact.follow_up && (
-                <div style={{ fontSize: 11, color: urgent ? "#ef4444" : "#b8b0a6", marginBottom: 6 }}>Follow-up: {contact.follow_up}</div>
+                <div style={{ fontSize: 11, color: dateUrgent ? "#ef4444" : "#b8b0a6", marginBottom: 6 }}>Follow-up: {contact.follow_up}</div>
+              )}
+              {contact.urgent && (
+                <div style={{ fontSize: 11, color: "#ef4444", fontWeight: 700, marginBottom: 6 }}>⚠ Marked urgent</div>
               )}
               {contact.notes && (
                 <div style={{ fontSize: 11, color: "#888", background: "#f0ede8", borderRadius: 8, padding: "8px 10px", marginBottom: 10, lineHeight: 1.5 }}>{contact.notes}</div>
@@ -121,6 +126,16 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
                   rows={3}
                   style={{ ...fieldInputStyle, resize: "vertical" as const }}
                 />
+              </div>
+              <div style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+                <input
+                  type="checkbox"
+                  id={`urgent-${contact.id}`}
+                  checked={!!form.urgent}
+                  onChange={(e) => setForm(x => ({ ...x, urgent: e.target.checked }))}
+                  style={{ width: 15, height: 15, accentColor: "#ef4444", cursor: "pointer" }}
+                />
+                <label htmlFor={`urgent-${contact.id}`} style={{ fontSize: 12, color: "#1a1714", fontWeight: 600, cursor: "pointer" }}>Mark as urgent</label>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
                 <button onClick={cancelEditing} disabled={saving} style={{ flex: 1, padding: "8px 0", borderRadius: 20, background: "#fff", border: "1px solid #e0dbd4", fontSize: 12, color: "#888", fontWeight: 600, cursor: "pointer" }}>Cancel</button>
