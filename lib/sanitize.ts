@@ -27,6 +27,7 @@ function sanitizeCardImage(value: unknown): string {
 const TEXT_FIELDS = [
   "first_name", "last_name", "title", "company",
   "email", "phone", "phone2", "website", "linkedin",
+  "instagram", "x_handle", "address",
   "event", "follow_up", "notes", "color", "added"
 ];
 

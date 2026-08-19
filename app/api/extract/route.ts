@@ -89,7 +89,16 @@ export async function POST(req: NextRequest) {
         role: "user",
         content: [
           { type: "image_url", image_url: { url: `data:${mediaType};base64,${base64}`, detail: "high" } },
-          { type: "text", text: `Extract all contact information from this business card image. Return ONLY valid JSON with these exact keys (use empty string if not found): {"first_name":"","last_name":"","title":"","company":"","email":"","phone":"","phone2":"","website":"","linkedin":"","instagram":"","x_handle":"","address":""}. For address: look for any street number, street name, city, state, zip code, or country anywhere on the card even if there is no label like "Address:" — any text that looks like a postal or mailing address should be captured in full. For instagram include the @ symbol if present. For x_handle include the @ symbol if present. No markdown, no explanation, just the JSON.` }
+          { type: "text", text: `Extract all contact information from this business card image. Return ONLY valid JSON with these exact keys (use empty string if not found): {"first_name":"","last_name":"","title":"","company":"","email":"","phone":"","phone2":"","website":"","linkedin":"","instagram":"","x_handle":"","address":""}.
+
+Rules:
+- address: capture ANY lines that form a postal address including street number, street name, floor, suite, city, state or province, postal code, country. Include even if there is no "Address:" label. Join multiple address lines with a comma.
+- instagram: handle starting with @ or URL containing instagram.com
+- x_handle: handle starting with @ or URL containing x.com or twitter.com
+- phone2: second phone number if a second one is present
+- All other fields: extract normally from the card
+
+No markdown, no explanation, just the raw JSON object.` }
         ]
       }]
     });
