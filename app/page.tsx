@@ -70,8 +70,11 @@ export default function Home() {
         body: JSON.stringify(contact),
       });
       if (res.ok) {
+        const saved = await res.json();
         setErrorMsg("");
-        await loadContacts(); setExtracted(null); setImageDataUrl(""); setTab("database");
+        setContacts(c => [saved, ...c]); // add instantly
+        setExtracted(null); setImageDataUrl(""); setTab("database");
+        loadContacts(); // refresh in background
       } else {
         const body = await res.json().catch(() => ({}));
         setErrorMsg(body.error || `Couldn't save contact (${res.status})`);
