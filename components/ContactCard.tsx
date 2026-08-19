@@ -39,6 +39,7 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
     for (const f of EDIT_FIELDS) {
       if ((form[f.key] ?? "") !== (contact[f.key] ?? "")) (changed as any)[f.key] = form[f.key] ?? "";
     }
+    if ((form.notes ?? "") !== (contact.notes ?? "")) changed.notes = form.notes ?? "";
     if (!!form.urgent !== !!contact.urgent) changed.urgent = !!form.urgent;
     const ok = Object.keys(changed).length === 0 ? true : await onEdited(contact.id, changed);
     setSaving(false);
@@ -114,12 +115,33 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
                 {EDIT_FIELDS.map(f => (
                   <div key={f.key} style={f.key === "follow_up" ? { gridColumn: "1 / -1" } : undefined}>
                     <div style={{ fontSize: 9, color: "#b8b0a6", fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.05em", marginBottom: 3 }}>{f.label}</div>
-                    <input
-                      type={f.type || "text"}
-                      value={(form[f.key] as string) || ""}
-                      onChange={(e) => setForm(x => ({ ...x, [f.key]: e.target.value }))}
-                      style={fieldInputStyle}
-                    />
+                    {f.key === "follow_up" ? (
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <input
+                          type={f.type || "text"}
+                          value={(form[f.key] as string) || ""}
+                          onChange={(e) => setForm(x => ({ ...x, [f.key]: e.target.value }))}
+                          style={{ ...fieldInputStyle, flex: 1 }}
+                        />
+                        {form.follow_up && (
+                          <button
+                            type="button"
+                            onClick={() => setForm(x => ({ ...x, follow_up: "" }))}
+                            aria-label="Clear follow-up date"
+                            style={{ fontSize: 11, color: "#888", background: "#fff", border: "1px solid #e8e6e2", borderRadius: 8, padding: "0 12px", cursor: "pointer", fontWeight: 600 }}
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <input
+                        type={f.type || "text"}
+                        value={(form[f.key] as string) || ""}
+                        onChange={(e) => setForm(x => ({ ...x, [f.key]: e.target.value }))}
+                        style={fieldInputStyle}
+                      />
+                    )}
                   </div>
                 ))}
               </div>

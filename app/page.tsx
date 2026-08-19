@@ -234,6 +234,17 @@ export default function Home() {
 
         {tab === "database" && (
           <div>
+            {urgentCount > 0 && (
+              <button
+                onClick={() => setSort("urgency")}
+                style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, background: "#fff4ef", border: "1px solid #f6c9b8", borderRadius: 12, padding: "10px 14px", marginBottom: 14, cursor: "pointer", textAlign: "left" }}
+              >
+                <span style={{ fontSize: 12, color: "#c2410c", fontWeight: 700 }}>
+                  ⚠ {urgentCount} follow-up{urgentCount !== 1 ? "s" : ""} overdue
+                </span>
+                <span style={{ fontSize: 11, color: "#c2410c", fontWeight: 600 }}>View →</span>
+              </button>
+            )}
             <input
               style={{ width: "100%", background: "#f7f5f2", border: "none", borderRadius: 30, padding: "9px 16px", fontSize: 13, color: "#1a1714", outline: "none", marginBottom: 14, fontFamily: "inherit" }}
               value={search} onChange={e => setSearch(e.target.value)} placeholder="Search contacts"
