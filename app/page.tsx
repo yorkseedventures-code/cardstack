@@ -21,6 +21,7 @@ export default function Home() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("date");
+  const [errorMsg, setErrorMsg] = useState("");
   const router = useRouter();
   const supabase = createClient();
 
@@ -32,8 +33,18 @@ export default function Home() {
   }, []);
 
   const loadContacts = async () => {
-    const res = await fetch("/api/contacts");
-    if (res.ok) setContacts(await res.json());
+    try {
+      const res = await fetch("/api/contacts");
+      if (res.ok) {
+        setContacts(await res.json());
+        setErrorMsg("");
+      } else {
+        const body = await res.json().catch(() => ({}));
+        setErrorMsg(body.error || `Failed to load contacts (${res.status})`);
+      }
+    } catch (e) {
+      setErrorMsg("Couldn't reach the server. Check your connection and try again.");
+    }
   };
 
   const handleExtracted = useCallback((data: ExtractedCard, imgUrl: string) => {
@@ -41,17 +52,37 @@ export default function Home() {
   }, []);
 
   const handleSaved = useCallback(async (contact: Omit<Contact, "id" | "user_id" | "created_at">) => {
-    const res = await fetch("/api/contacts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(contact),
-    });
-    if (res.ok) { await loadContacts(); setExtracted(null); setImageDataUrl(""); setTab("database"); }
+    try {
+      const res = await fetch("/api/contacts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(contact),
+      });
+      if (res.ok) {
+        setErrorMsg("");
+        await loadContacts(); setExtracted(null); setImageDataUrl(""); setTab("database");
+      } else {
+        const body = await res.json().catch(() => ({}));
+        setErrorMsg(body.error || `Couldn't save contact (${res.status})`);
+      }
+    } catch (e) {
+      setErrorMsg("Couldn't reach the server. Check your connection and try again.");
+    }
   }, []);
 
   const handleDeleted = useCallback(async (id: string) => {
-    await fetch("/api/contacts", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
-    setContacts(c => c.filter(x => x.id !== id));
+    try {
+      const res = await fetch("/api/contacts", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+      if (res.ok) {
+        setContacts(c => c.filter(x => x.id !== id));
+        setErrorMsg("");
+      } else {
+        const body = await res.json().catch(() => ({}));
+        setErrorMsg(body.error || `Couldn't delete contact (${res.status})`);
+      }
+    } catch (e) {
+      setErrorMsg("Couldn't reach the server. Check your connection and try again.");
+    }
   }, []);
 
   const handleSignOut = async () => { await supabase.auth.signOut(); router.push("/landing"); };
@@ -111,6 +142,12 @@ export default function Home() {
       </header>
 
       <main style={{ flex: 1, padding: "20px 20px 100px", overflowY: "auto" }}>
+        {errorMsg && (
+          <div style={{ background: "#fff4ef", border: "1px solid #DC2626", color: "#DC2626", fontSize: 12, fontWeight: 600, padding: "10px 14px", borderRadius: 10, marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+            <span>{errorMsg}</span>
+            <button onClick={() => setErrorMsg("")} style={{ background: "none", border: "none", color: "#DC2626", fontWeight: 900, cursor: "pointer", fontSize: 14, lineHeight: 1 }}>×</button>
+          </div>
+        )}
         {tab === "scan" && (
           !extracted ? <Scanner onExtracted={handleExtracted} /> :
           <ContactForm extracted={extracted} imageDataUrl={imageDataUrl} onSaved={handleSaved} onReset={() => { setExtracted(null); setImageDataUrl(""); }} />
