@@ -37,7 +37,6 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    // Show cached contacts instantly while fresh data loads
     const cached = localStorage.getItem("kc_contacts_cache");
     if (cached) {
       try { setContacts(JSON.parse(cached)); } catch {}
@@ -45,11 +44,11 @@ export default function Home() {
 
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) router.push("/landing");
-      else { setUser(user); setLoading(false); loadContacts(); }
+      else { setUser(user); setLoading(false); loadContacts(true); }
     });
   }, []);
 
-  const loadContacts = async () => {
+  const loadContacts = async (showErrors = true) => {
     try {
       const res = await fetch("/api/contacts");
       if (res.ok) {
@@ -57,14 +56,15 @@ export default function Home() {
         setContacts(data);
         localStorage.setItem("kc_contacts_cache", JSON.stringify(data));
         setErrorMsg("");
-      } else {
+      } else if (showErrors) {
         const body = await res.json().catch(() => ({}));
         setErrorMsg(body.error || `Failed to load contacts (${res.status})`);
       }
     } catch (e) {
-      // Only show error if we have no cached data to show
-      const cached = localStorage.getItem("kc_contacts_cache");
-      if (!cached) setErrorMsg("Couldn't reach the server. Check your connection and try again.");
+      if (showErrors) {
+        const cached = localStorage.getItem("kc_contacts_cache");
+        if (!cached) setErrorMsg("Couldn't reach the server. Check your connection and try again.");
+      }
     }
   };
 
@@ -84,7 +84,7 @@ export default function Home() {
         setErrorMsg("");
         setContacts(c => [saved, ...c]); // add instantly
         setExtracted(null); setImageDataUrl(""); setTab("database");
-        loadContacts(); // refresh in background
+        loadContacts(false); // refresh in background silently
       } else {
         const body = await res.json().catch(() => ({}));
         setErrorMsg(body.error || `Couldn't save contact (${res.status})`);
