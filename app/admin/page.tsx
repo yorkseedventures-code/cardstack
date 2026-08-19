@@ -104,7 +104,7 @@ export default function AdminPage() {
 
             {stats.signups.daily && (
               <div style={{ background: "#fff", borderRadius: 14, padding: "16px" }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "#1a1714", marginBottom: 16 }}>Daily signups — last 14 days</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#1a1714", marginBottom: 16 }}>Daily signups - last 14 days</div>
                 <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 80 }}>
                   {stats.signups.daily.map(d => (
                     <div key={d.label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
