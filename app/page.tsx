@@ -18,6 +18,7 @@ export default function Home() {
   const [tab, setTab] = useState<Tab>("scan");
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [extracted, setExtracted] = useState<ExtractedCard | null>(null);
   const [imageDataUrl, setImageDataUrl] = useState("");
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -49,18 +50,45 @@ export default function Home() {
     });
   }, []);
 
-  const loadContacts = async () => {
+  const loadContacts = async (attempt = 0) => {
+    if (attempt === 0) setSyncing(true);
+    let deferred = false;
     try {
       const res = await fetch("/api/contacts");
-      if (res.ok) {
-        const data = await res.json();
-        setContacts(data);
-        localStorage.setItem("kc_contacts_cache", JSON.stringify(data));
-        setErrorMsg("");
+      if (!res.ok) return; // Silently ignore 401 (not authed yet) and other transient errors
+
+      const data = await res.json();
+      if (!Array.isArray(data)) return;
+
+      // Guard against a transient auth/session race right after login: the client can
+      // believe it's authed a moment before the server-side cookie is fully readable,
+      // so /api/contacts can legitimately respond 200 with an empty array even though
+      // the user has contacts. If we already had contacts (from cache or a prior load)
+      // and the server suddenly says "none", never trust that empty result over real
+      // data — keep retrying (with capped backoff) until a fetch actually comes back
+      // non-empty. This never overwrites real contacts or wipes the cache with a stale
+      // "empty" response.
+      setContacts(prev => {
+        if (data.length === 0 && prev.length > 0) {
+          deferred = true;
+          return prev;
+        }
+        return data;
+      });
+
+      if (deferred) {
+        setTimeout(() => loadContacts(attempt + 1), Math.min(1000 * (attempt + 1), 8000));
+        return;
       }
-      // Silently ignore 401 (not authed yet) and other transient errors
+
+      localStorage.setItem("kc_contacts_cache", JSON.stringify(data));
+      setErrorMsg("");
     } catch (e) {
       // Silently ignore network errors on background loads
+    } finally {
+      // Only stop showing the "syncing" spinner once we're not about to retry —
+      // otherwise the empty state would flash "no contacts" between retries.
+      if (!deferred) setSyncing(false);
     }
   };
 
@@ -279,7 +307,13 @@ export default function Home() {
 
             {sorted.length === 0 ? (
               <div style={{ textAlign: "center", padding: "60px 0", color: "#b8b0a6", fontSize: 14 }}>
-                {contacts.length === 0 ? "No contacts yet, scan your first card" : "No results"}
+                {contacts.length === 0 && syncing ? (
+                  <div style={{ width: 22, height: 22, margin: "0 auto", borderRadius: "50%", border: "2px solid #d8d2c8", borderTopColor: "#1a1714", animation: "spin 0.8s linear infinite" }} />
+                ) : contacts.length === 0 ? (
+                  "No contacts yet, scan your first card"
+                ) : (
+                  "No results"
+                )}
               </div>
             ) : (
               <div>

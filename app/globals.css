@@ -98,3 +98,7 @@ textarea.field-input { resize: none; min-height: 72px; }
   .desktop-header { padding: 28px 32px 16px !important; }
   .desktop-main { padding: 24px 32px 40px !important; }
 }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
