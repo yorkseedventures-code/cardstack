@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { createClient } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function AuthPage() {
+function AuthPageInner() {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -12,6 +12,8 @@ export default function AuthPage() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/";
   const supabase = createClient();
 
   const handleSubmit = async () => {
@@ -26,7 +28,7 @@ export default function AuthPage() {
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setError(error.message);
-      else router.push("/");
+      else router.push(redirectTo);
     }
     setLoading(false);
   };
@@ -96,5 +98,13 @@ export default function AuthPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={null}>
+      <AuthPageInner />
+    </Suspense>
   );
 }

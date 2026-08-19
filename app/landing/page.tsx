@@ -105,6 +105,25 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [giftMode, setGiftMode] = useState(false);
   const [giftEmail, setGiftEmail] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState("event");
+  const [giftError, setGiftError] = useState("");
+
+  const handleSendGift = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!giftEmail || !/^\S+@\S+\.\S+$/.test(giftEmail)) {
+      setGiftError("Enter a valid email for your friend");
+      return;
+    }
+    setGiftError("");
+    const subject = "You've got a ScanBiz Event Pass coming your way";
+    const body =
+      `Hey!\n\nI wanted to send you a ScanBiz Event Pass, unlimited business card scanning for 4 days, perfect for your next conference.\n\n` +
+      `Head to scanbiz.app and sign up, then check out with the Event Pass ($4.99) so it's ready for you.\n\n` +
+      `Talk soon!`;
+    window.location.href = `mailto:${encodeURIComponent(giftEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    setSelectedPlan("event");
+    router.push("/auth");
+  };
 
   return (
     <div className="min-h-dvh bg-[#f8f7f5] flex flex-col">
@@ -196,8 +215,9 @@ export default function LandingPage() {
           {PLANS.map((plan) => (
             <div
               key={plan.id}
-              className={`relative rounded-xl p-5 flex flex-col h-full ${
-                plan.highlight
+              onClick={() => setSelectedPlan(plan.id)}
+              className={`relative rounded-xl p-5 flex flex-col h-full cursor-pointer transition-all ${
+                selectedPlan === plan.id
                   ? "bg-white border-2 border-brand shadow-sm"
                   : "bg-white border border-[#ece9e4]"
               }`}
@@ -231,28 +251,37 @@ export default function LandingPage() {
               {plan.giftable && (
                 <div className="mb-4">
                   <button
-                    onClick={() => setGiftMode((v) => !v)}
+                    onClick={(e) => { e.stopPropagation(); setGiftMode((v) => !v); setGiftError(""); }}
                     className="w-full flex items-center justify-between text-xs font-medium text-[#666] bg-[#f7f5f2] rounded-lg px-3 py-2 mb-2"
                   >
                     <span>🎁 Gift to a friend</span>
                     <span className="text-[#bbb]">{giftMode ? "−" : "+"}</span>
                   </button>
                   {giftMode && (
-                    <input
-                      type="email"
-                      value={giftEmail}
-                      onChange={(e) => setGiftEmail(e.target.value)}
-                      placeholder="Friend's email"
-                      className="w-full bg-[#f7f5f2] border-none rounded-lg px-3 py-2 text-xs text-[#111] outline-none placeholder:text-[#bbb]"
-                    />
+                    <>
+                      <input
+                        type="email"
+                        value={giftEmail}
+                        onChange={(e) => { setGiftEmail(e.target.value); setGiftError(""); }}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="Friend's email"
+                        className="w-full bg-[#f7f5f2] border-none rounded-lg px-3 py-2 text-xs text-[#111] outline-none placeholder:text-[#bbb]"
+                      />
+                      {giftError && (
+                        <p className="text-[10px] text-red-500 mt-1">{giftError}</p>
+                      )}
+                    </>
                   )}
                 </div>
               )}
 
               <button
-                onClick={() => router.push("/auth")}
+                onClick={(e) => {
+                  if (plan.giftable && giftMode) { handleSendGift(e); return; }
+                  e.stopPropagation(); setSelectedPlan(plan.id); router.push("/auth");
+                }}
                 className={`w-full py-2.5 rounded-lg text-xs font-medium transition-all ${
-                  plan.highlight
+                  selectedPlan === plan.id
                     ? "bg-brand text-white hover:bg-brand/90"
                     : "bg-[#f7f5f2] text-[#111] hover:bg-[#ece9e4]"
                 }`}
