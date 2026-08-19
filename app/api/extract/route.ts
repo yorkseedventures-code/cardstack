@@ -47,7 +47,6 @@ async function findLinkedIn(name: string, company: string): Promise<string> {
 }
 
 export async function POST(req: NextRequest) {
-  // Strict rate limit for AI extraction: 10 per minute per IP
   const { allowed } = rateLimit(getIP(req), 10, 60_000);
   if (!allowed) return NextResponse.json({ error: "Too many requests, slow down" }, { status: 429 });
 
@@ -75,7 +74,6 @@ export async function POST(req: NextRequest) {
   try {
     const { base64, mediaType } = await req.json();
 
-    // Validate inputs
     if (!base64 || !mediaType) return NextResponse.json({ error: "Missing image" }, { status: 400 });
     if (!["image/jpeg", "image/png", "image/webp"].includes(mediaType)) {
       return NextResponse.json({ error: "Invalid image type" }, { status: 400 });
@@ -91,7 +89,7 @@ export async function POST(req: NextRequest) {
         role: "user",
         content: [
           { type: "image_url", image_url: { url: `data:${mediaType};base64,${base64}`, detail: "high" } },
-          { type: "text", text: `Extract contact info from this business card. Return ONLY valid JSON with these keys (empty string if not found): {"first_name":"","last_name":"","title":"","company":"","email":"","phone":"","website":"","linkedin":""}` }
+          { type: "text", text: `Extract all contact information from this business card image. Return ONLY valid JSON with these exact keys (use empty string if not found): {"first_name":"","last_name":"","title":"","company":"","email":"","phone":"","phone2":"","website":"","linkedin":"","instagram":"","x_handle":"","address":""}. For instagram include the @ symbol if present. For x_handle include the @ symbol if present. For address include the full street address if present. No markdown, no explanation, just the JSON.` }
         ]
       }]
     });
