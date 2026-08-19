@@ -90,6 +90,30 @@ export default function Home() {
     }
   }, [contacts]);
 
+  const handleEdited = useCallback(async (id: string, updates: Partial<Contact>): Promise<boolean> => {
+    const prev = contacts;
+    setContacts(c => c.map(x => x.id === id ? { ...x, ...updates } : x)); // optimistic
+    try {
+      const res = await fetch("/api/contacts", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...updates }),
+      });
+      if (res.ok) {
+        setErrorMsg("");
+        return true;
+      }
+      setContacts(prev); // revert
+      const body = await res.json().catch(() => ({}));
+      setErrorMsg(body.error || `Couldn't save changes (${res.status})`);
+      return false;
+    } catch (e) {
+      setContacts(prev); // revert
+      setErrorMsg("Couldn't reach the server. Check your connection and try again.");
+      return false;
+    }
+  }, [contacts]);
+
   const handleDeleted = useCallback(async (id: string) => {
     try {
       const res = await fetch("/api/contacts", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
@@ -196,7 +220,7 @@ export default function Home() {
                 {contacts.length === 0 ? "No contacts yet — scan your first card" : "No results"}
               </div>
             ) : (
-              sorted.map(c => <ContactCard key={c.id} contact={c} onDeleted={handleDeleted} onColorChange={handleColorChange} />)
+              sorted.map(c => <ContactCard key={c.id} contact={c} onDeleted={handleDeleted} onColorChange={handleColorChange} onEdited={handleEdited} />)
             )}
           </div>
         )}
