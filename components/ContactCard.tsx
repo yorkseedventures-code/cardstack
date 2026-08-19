@@ -31,6 +31,11 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
   const [confirming, setConfirming] = useState(false);
   const [savingPhoto, setSavingPhoto] = useState(false);
   const [form, setForm] = useState<Partial<Contact>>(contact);
+  // card_image is no longer included in the list fetch (it's a heavy base64 photo
+  // that was blowing through Supabase egress), so fetch it on demand the first
+  // time this specific card is expanded.
+  const [cardImage, setCardImage] = useState<string | undefined>(contact.card_image);
+  const [imageLoading, setImageLoading] = useState(false);
   const color = getColor(contact.color || "grey");
   const today = new Date().toISOString().split("T")[0];
   const dateUrgent = !!contact.follow_up && contact.follow_up <= today;
@@ -38,6 +43,21 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
 
   const startEditing = () => { setForm(contact); setEditing(true); };
   const cancelEditing = () => { setForm(contact); setEditing(false); };
+
+  const toggleExpanded = () => {
+    setExpanded(e => {
+      const next = !e;
+      if (next && cardImage === undefined && !imageLoading) {
+        setImageLoading(true);
+        fetch(`/api/contacts/${contact.id}/image`)
+          .then(res => res.ok ? res.json() : { card_image: "" })
+          .then(data => setCardImage(data.card_image || ""))
+          .catch(() => setCardImage(""))
+          .finally(() => setImageLoading(false));
+      }
+      return next;
+    });
+  };
 
   const saveEditing = async () => {
     setSaving(true);
@@ -70,7 +90,7 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
         </div>
       )}
       <div
-        onClick={() => setExpanded(e => !e)}
+        onClick={toggleExpanded}
         style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 0", borderBottom: "0.5px solid #f5f2ee", cursor: "pointer" }}
       >
         <div style={{ width: 3, height: 34, borderRadius: 2, background: color.strip, flexShrink: 0 }} />
@@ -89,15 +109,18 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
         <div className="slide-up" style={{ background: "#fafaf8", borderRadius: 14, padding: "12px 14px", margin: "4px 0 8px 13px", border: "0.5px solid #f0ede8" }}>
           {!editing ? (
             <>
-              {contact.card_image && (
+              {imageLoading && (
+                <div style={{ marginBottom: 10, fontSize: 11, color: "#b8b0a6" }}>Loading card image...</div>
+              )}
+              {cardImage && (
                 <div style={{ marginBottom: 10 }}>
-                  <img src={contact.card_image} alt="Scanned card" style={{ width: "100%", maxHeight: 140, objectFit: "contain", borderRadius: 10, background: "#fff", border: "0.5px solid #f0ede8" }} />
+                  <img src={cardImage} alt="Scanned card" style={{ width: "100%", maxHeight: 140, objectFit: "contain", borderRadius: 10, background: "#fff", border: "0.5px solid #f0ede8" }} />
                   <button
                     disabled={savingPhoto}
                     onClick={async () => {
                       setSavingPhoto(true);
                       try {
-                        await savePhotoToDevice(contact.card_image!, `${contact.first_name}_${contact.last_name}_card.jpg`);
+                        await savePhotoToDevice(cardImage!, `${contact.first_name}_${contact.last_name}_card.jpg`);
                       } finally {
                         setSavingPhoto(false);
                       }

@@ -32,9 +32,14 @@ export async function GET(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  // Deliberately exclude card_image here: it's a base64 photo (~250-300KB each)
+  // and this list query runs on every page load/retry/background refresh. Pulling
+  // it for every contact just to render a scrollable list burns through Supabase's
+  // egress quota fast. The image is fetched on demand instead, via
+  // GET /api/contacts/[id]/image, only when a contact card is actually expanded.
   const { data, error } = await supabase
     .from("contacts")
-    .select("*")
+    .select("id, user_id, first_name, last_name, title, company, email, phone, phone2, website, linkedin, instagram, x_handle, address, event, follow_up, notes, added, color, urgent, created_at")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
