@@ -1,11 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import { rateLimit } from "@/lib/rate-limit";
+import { FREE_MONTHLY_SCAN_LIMIT, hasUnlimitedScans, startOfCurrentMonthISO } from "@/lib/plan";
 
 let client: OpenAI | null = null;
 function getClient(): OpenAI {
   if (!client) client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   return client;
+}
+
+function getSupabase() {
+  const cookieStore = cookies();
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll(); },
+        setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+          try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)); } catch {}
+        },
+      },
+    }
+  );
 }
 
 function getIP(req: NextRequest): string {
@@ -31,6 +50,27 @@ export async function POST(req: NextRequest) {
   // Strict rate limit for AI extraction: 10 per minute per IP
   const { allowed } = rateLimit(getIP(req), 10, 60_000);
   if (!allowed) return NextResponse.json({ error: "Too many requests, slow down" }, { status: 429 });
+
+  const supabase = getSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  if (!hasUnlimitedScans(user.email)) {
+    const { count, error: countError } = await supabase
+      .from("scans")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", startOfCurrentMonthISO());
+
+    if (countError) return NextResponse.json({ error: countError.message }, { status: 500 });
+
+    if ((count ?? 0) >= FREE_MONTHLY_SCAN_LIMIT) {
+      return NextResponse.json(
+        { error: `You've hit your ${FREE_MONTHLY_SCAN_LIMIT} free scans this month. Upgrade to keep scanning.`, limitReached: true },
+        { status: 403 }
+      );
+    }
+  }
 
   try {
     const { base64, mediaType } = await req.json();
@@ -64,6 +104,8 @@ export async function POST(req: NextRequest) {
       const fullName = `${data.first_name} ${data.last_name}`.trim();
       data.linkedin = await findLinkedIn(fullName, data.company || "");
     }
+
+    await supabase.from("scans").insert({ user_id: user.id });
 
     return NextResponse.json(data);
   } catch (err) {

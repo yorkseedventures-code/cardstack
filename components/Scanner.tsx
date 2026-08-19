@@ -25,6 +25,7 @@ export default function Scanner({ onExtracted }: ScannerProps) {
 
   const processImage = useCallback(async (dataUrl: string) => {
     setMode("processing");
+    setError("");
     try {
       const base64 = dataUrl.split(",")[1];
       const mediaType = dataUrl.split(";")[0].split(":")[1];
@@ -34,9 +35,14 @@ export default function Scanner({ onExtracted }: ScannerProps) {
         body: JSON.stringify({ base64, mediaType }),
       });
       const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Something went wrong, try again");
+        setMode("idle");
+        return;
+      }
       onExtracted(data, dataUrl);
     } catch {
-      onExtracted({ first_name:"",last_name:"",title:"",company:"",email:"",phone:"",phone2:"",website:"",linkedin:"" }, dataUrl);
+      setError("Something went wrong, try again");
     } finally { setMode("idle"); }
   }, [onExtracted]);
 
