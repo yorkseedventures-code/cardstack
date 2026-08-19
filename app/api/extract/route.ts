@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { rateLimit } from "@/lib/rate-limit";
-import { FREE_MONTHLY_SCAN_LIMIT, hasUnlimitedScans, startOfCurrentMonthISO } from "@/lib/plan";
+import { FREE_MONTHLY_SCAN_LIMIT, hasUnlimitedScans, hasActiveEntitlement, startOfCurrentMonthISO } from "@/lib/plan";
 
 let client: OpenAI | null = null;
 function getClient(): OpenAI {
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  if (!hasUnlimitedScans(user.email)) {
+  if (!hasUnlimitedScans(user.email) && !(await hasActiveEntitlement(supabase, user.id))) {
     const { count, error: countError } = await supabase
       .from("scans")
       .select("id", { count: "exact", head: true })

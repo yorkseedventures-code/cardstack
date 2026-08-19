@@ -10,6 +10,7 @@ import AddToHomeScreen from "@/components/AddToHomeScreen";
 import SettingsTab from "@/components/SettingsTab";
 import { Contact, ExtractedCard } from "@/lib/types";
 import { getColor } from "@/lib/colors";
+import { saveFileToDevice } from "@/lib/savePhoto";
 
 type Tab = "scan" | "database" | "settings";
 type SortOption = "date" | "color" | "urgency" | "az" | "company";
@@ -63,13 +64,16 @@ export default function Home() {
       // Guard against a transient auth/session race right after login: the client can
       // believe it's authed a moment before the server-side cookie is fully readable,
       // so /api/contacts can legitimately respond 200 with an empty array even though
-      // the user has contacts. If we already had contacts (from cache or a prior load)
-      // and the server suddenly says "none", never trust that empty result over real
-      // data — keep retrying (with capped backoff) until a fetch actually comes back
-      // non-empty. This never overwrites real contacts or wipes the cache with a stale
-      // "empty" response.
+      // the user has contacts. This race can happen on ANY fresh load — not just when
+      // we already have contacts to compare against (e.g. a cold/cleared cache) — so we
+      // never trust a first-look empty result outright:
+      //   - if we already know the user has contacts, retry indefinitely until we get
+      //     a real, non-empty answer (never overwrite known-good data with "none")
+      //   - if we don't know yet (cold cache), give it a handful of retries to ride out
+      //     the race, then accept an empty result as genuinely "no contacts"
+      const MAX_COLD_ATTEMPTS = 5;
       setContacts(prev => {
-        if (data.length === 0 && prev.length > 0) {
+        if (data.length === 0 && (prev.length > 0 || attempt < MAX_COLD_ATTEMPTS)) {
           deferred = true;
           return prev;
         }
@@ -201,13 +205,7 @@ export default function Home() {
     const rows = contacts.map(c => [c.first_name,c.last_name,c.title,c.company,c.email,c.phone,c.phone2,c.website,c.linkedin,c.event,c.follow_up,c.notes,c.added,c.color].map(v => `"${(v||"").replace(/"/g,'""')}"`));
     const csv = [headers,...rows].map(r => r.join(",")).join("\r\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = "koicard-contacts.csv";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 200);
+    saveFileToDevice(blob, "koicard-contacts.csv");
   };
 
   const today = new Date().toISOString().split("T")[0];

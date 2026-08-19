@@ -2,6 +2,7 @@
 
 import { useRef, useState, useCallback, useEffect } from "react";
 import { ExtractedCard } from "@/lib/types";
+import UpgradeModal from "@/components/UpgradeModal";
 
 interface ScannerProps {
   onExtracted: (data: ExtractedCard, imageDataUrl: string) => void;
@@ -15,6 +16,7 @@ export default function Scanner({ onExtracted }: ScannerProps) {
   const [mode, setMode] = useState<"idle" | "camera" | "processing">("idle");
   const [drag, setDrag] = useState(false);
   const [error, setError] = useState("");
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   useEffect(() => {
     if (mode === "camera" && videoRef.current && streamRef.current) {
@@ -36,7 +38,11 @@ export default function Scanner({ onExtracted }: ScannerProps) {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Something went wrong, try again");
+        if (data.limitReached) {
+          setShowUpgrade(true);
+        } else {
+          setError(data.error || "Something went wrong, try again");
+        }
         setMode("idle");
         return;
       }
@@ -119,6 +125,7 @@ export default function Scanner({ onExtracted }: ScannerProps) {
   );
 
   return (
+    <>
     <div
       className={"w-full aspect-[4/3] rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-5 transition-all cursor-pointer " + (drag ? "border-brand bg-[#fff1f1]" : "border-[#ddd] bg-white")}
       onClick={() => fileRef.current?.click()}
@@ -138,5 +145,7 @@ export default function Scanner({ onExtracted }: ScannerProps) {
       </div>
       {error && <p className="text-red-500 text-xs text-center px-4">{error}</p>}
     </div>
+    {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} />}
+    </>
   );
 }
