@@ -44,11 +44,11 @@ export default function Home() {
 
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) router.push("/landing");
-      else { setUser(user); setLoading(false); loadContacts(true); }
+      else { setUser(user); setLoading(false); loadContacts(); }
     });
   }, []);
 
-  const loadContacts = async (showErrors = true) => {
+  const loadContacts = async () => {
     try {
       const res = await fetch("/api/contacts");
       if (res.ok) {
@@ -56,15 +56,10 @@ export default function Home() {
         setContacts(data);
         localStorage.setItem("kc_contacts_cache", JSON.stringify(data));
         setErrorMsg("");
-      } else if (showErrors) {
-        const body = await res.json().catch(() => ({}));
-        setErrorMsg(body.error || `Failed to load contacts (${res.status})`);
       }
+      // Silently ignore 401 (not authed yet) and other transient errors
     } catch (e) {
-      if (showErrors) {
-        const cached = localStorage.getItem("kc_contacts_cache");
-        if (!cached) setErrorMsg("Couldn't reach the server. Check your connection and try again.");
-      }
+      // Silently ignore network errors on background loads
     }
   };
 
@@ -84,7 +79,7 @@ export default function Home() {
         setErrorMsg("");
         setContacts(c => [saved, ...c]); // add instantly
         setExtracted(null); setImageDataUrl(""); setTab("database");
-        loadContacts(false); // refresh in background silently
+        loadContacts(); // refresh in background silently
       } else {
         const body = await res.json().catch(() => ({}));
         setErrorMsg(body.error || `Couldn't save contact (${res.status})`);
