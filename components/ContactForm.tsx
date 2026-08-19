@@ -46,6 +46,8 @@ export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset 
         <div><Label>Company</Label><input className="field-input" value={form.company} onChange={set("company")} placeholder="-" /></div>
         <div><Label>Email</Label><input className="field-input" type="email" value={form.email} onChange={set("email")} placeholder="-" /></div>
         <div><Label>Phone</Label><input className="field-input" type="tel" value={form.phone} onChange={set("phone")} placeholder="-" /></div>
+        <div><Label>Phone 2</Label><input className="field-input" type="tel" value={form.phone2} onChange={set("phone2")} placeholder="-" /></div>
+        <div><Label>Website</Label><input className="field-input" value={form.website} onChange={set("website")} placeholder="-" /></div>
         <div><Label>LinkedIn</Label><input className="field-input" value={form.linkedin} onChange={set("linkedin")} placeholder="-" /></div>
         <div><Label>Where met</Label><input className="field-input" value={form.event} onChange={set("event")} placeholder="e.g. Slush 2026" /></div>
       </div>

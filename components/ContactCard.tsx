@@ -11,6 +11,7 @@ const EDIT_FIELDS: { key: keyof Contact; label: string; type?: string }[] = [
   { key: "company", label: "Company" },
   { key: "email", label: "Email", type: "email" },
   { key: "phone", label: "Phone", type: "tel" },
+  { key: "phone2", label: "Phone 2", type: "tel" },
   { key: "linkedin", label: "LinkedIn" },
   { key: "website", label: "Website" },
   { key: "event", label: "Where met" },
@@ -66,9 +67,13 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
         <div className="slide-up" style={{ background: "#fafaf8", borderRadius: 14, padding: "12px 14px", margin: "4px 0 8px 13px", border: "0.5px solid #f0ede8" }}>
           {!editing ? (
             <>
+              {contact.card_image && (
+                <img src={contact.card_image} alt="Scanned card" style={{ width: "100%", maxHeight: 140, objectFit: "contain", borderRadius: 10, background: "#fff", marginBottom: 10, border: "0.5px solid #f0ede8" }} />
+              )}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 12, marginBottom: 10 }}>
                 {contact.email && <a href={`mailto:${contact.email}`} style={{ color: "#1a1714", textDecoration: "none" }}>✉ {contact.email}</a>}
                 {contact.phone && <a href={`tel:${contact.phone}`} style={{ color: "#1a1714", textDecoration: "none" }}>✆ {contact.phone}</a>}
+                {contact.phone2 && <a href={`tel:${contact.phone2}`} style={{ color: "#1a1714", textDecoration: "none" }}>✆ {contact.phone2} (2)</a>}
                 {contact.linkedin && <a href={contact.linkedin.startsWith("http") ? contact.linkedin : `https://${contact.linkedin}`} target="_blank" rel="noopener noreferrer" style={{ color: "#3b82f6", textDecoration: "none" }}>in LinkedIn</a>}
                 {contact.website && <a href={contact.website.startsWith("http") ? contact.website : `https://${contact.website}`} target="_blank" rel="noopener noreferrer" style={{ color: "#1a1714", textDecoration: "none" }}>↗ {contact.website}</a>}
               </div>
