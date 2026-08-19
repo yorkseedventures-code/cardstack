@@ -12,10 +12,10 @@ interface ContactFormProps {
 }
 
 export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset }: ContactFormProps) {
-  const [form, setForm] = useState({ ...extracted, event: "", follow_up: "", notes: "", color: "grey" });
+  const [form, setForm] = useState({ ...extracted, event: "", follow_up: "", notes: "", color: "grey", instagram: "", x_handle: "", address: "" });
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { setForm({ ...extracted, event: "", follow_up: "", notes: "", color: "grey" }); }, [extracted]);
+  useEffect(() => { setForm({ ...extracted, event: "", follow_up: "", notes: "", color: "grey", instagram: "", x_handle: "", address: "" }); }, [extracted]);
 
   const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [key]: e.target.value }));
@@ -49,7 +49,14 @@ export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset 
         <div><Label>Phone 2</Label><input className="field-input" type="tel" value={form.phone2} onChange={set("phone2")} placeholder="-" /></div>
         <div><Label>Website</Label><input className="field-input" value={form.website} onChange={set("website")} placeholder="-" /></div>
         <div><Label>LinkedIn</Label><input className="field-input" value={form.linkedin} onChange={set("linkedin")} placeholder="-" /></div>
+        <div><Label>Instagram</Label><input className="field-input" value={form.instagram} onChange={set("instagram")} placeholder="@username" /></div>
+        <div><Label>X (Twitter)</Label><input className="field-input" value={form.x_handle} onChange={set("x_handle")} placeholder="@username" /></div>
         <div><Label>Where met</Label><input className="field-input" value={form.event} onChange={set("event")} placeholder="e.g. Slush 2026" /></div>
+      </div>
+
+      <div style={{ marginBottom: 10 }}>
+        <Label>Address</Label>
+        <input className="field-input" value={form.address} onChange={set("address")} placeholder="Optional" />
       </div>
 
       <div style={{ marginBottom: 10 }}>

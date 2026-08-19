@@ -204,8 +204,50 @@ export default function Home() {
   );
 
   return (
-    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", maxWidth: containerWidth, margin: "0 auto", transition: "max-width 0.2s ease" }}>
-      <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "24px 20px 16px", borderBottom: "0.5px solid #f0ede8" }}>
+    <div className="app-shell">
+      {/* Desktop sidebar */}
+      <aside className="app-sidebar">
+        <div style={{ fontSize: 22, fontWeight: 900, color: "#1a1714", letterSpacing: -0.8, marginBottom: 4 }}>
+          koi<span style={{ color: "#FF7A3D" }}>card</span>
+        </div>
+        <div style={{ fontSize: 11, color: "#b8b0a6", marginBottom: 32 }}>
+          {contacts.length} contact{contacts.length !== 1 ? "s" : ""}
+          {urgentCount > 0 ? ` · ${urgentCount} urgent` : ""}
+        </div>
+
+        {(["scan", "database", "settings"] as Tab[]).map(t => {
+          const icons: Record<Tab, string> = { scan: "ti-scan", database: "ti-address-book", settings: "ti-settings" };
+          const labels: Record<Tab, string> = { scan: "Scan card", database: "Contacts", settings: "Settings" };
+          return (
+            <button key={t} onClick={() => { setTab(t); if (t === "scan") { setExtracted(null); setImageDataUrl(""); } }}
+              style={{
+                display: "flex", alignItems: "center", gap: 10, padding: "10px 14px",
+                borderRadius: 12, border: "none", cursor: "pointer", width: "100%", textAlign: "left",
+                marginBottom: 4, fontSize: 13, fontWeight: tab === t ? 700 : 500,
+                background: tab === t ? "#1a1714" : "transparent",
+                color: tab === t ? "#fff" : "#888",
+              }}>
+              <i className={`ti ${icons[t]}`} style={{ fontSize: 16 }} aria-hidden="true" />
+              {labels[t]}
+            </button>
+          );
+        })}
+
+        <div style={{ marginTop: "auto", paddingTop: 32 }}>
+          <div style={{ fontSize: 11, color: "#c8c0b8", lineHeight: 1.6 }}>
+            Signed in as<br />
+            <span style={{ color: "#888" }}>{user?.email}</span>
+          </div>
+          <button onClick={handleSignOut} style={{ marginTop: 10, fontSize: 11, color: "#b8b0a6", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+            Sign out
+          </button>
+        </div>
+      </aside>
+
+      {/* Main content */}
+      <div className="app-content">
+      <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
+      <header className="desktop-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "24px 20px 16px", borderBottom: "0.5px solid #f0ede8" }}>
         <div>
           <div style={{ fontSize: 26, fontWeight: 900, color: "#1a1714", letterSpacing: -1, lineHeight: 1 }}>koi<span style={{ color: "#DC2626" }}>card</span></div>
           <div style={{ fontSize: 11, color: "#b8b0a6", marginTop: 2 }}>
@@ -220,7 +262,7 @@ export default function Home() {
         )}
       </header>
 
-      <main style={{ flex: 1, padding: "20px 20px 100px", overflowY: "auto" }}>
+      <main className="desktop-main" style={{ flex: 1, padding: "20px 20px 100px", overflowY: "auto" }}>
         {errorMsg && (
           <div style={{ background: "#fff4ef", border: "1px solid #DC2626", color: "#DC2626", fontSize: 12, fontWeight: 600, padding: "10px 14px", borderRadius: 10, marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
             <span>{errorMsg}</span>
