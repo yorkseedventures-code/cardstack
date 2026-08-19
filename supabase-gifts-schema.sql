@@ -1,4 +1,4 @@
--- ScanBiz: gift Event Passes + user plan state
+-- KoiCard: gift Event Passes + user plan state
 -- Run this in Supabase: Dashboard → SQL Editor → New query → paste → Run
 
 -- Tracks each purchased gift and whether it's been claimed yet.

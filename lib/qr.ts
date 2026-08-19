@@ -28,7 +28,7 @@ export function decodeQRFromDataUrl(dataUrl: string): Promise<string | null> {
   });
 }
 
-/** Very small vCard (VCF) parser covering the fields ScanBiz cares about. */
+/** Very small vCard (VCF) parser covering the fields KoiCard cares about. */
 export function parseVCard(text: string): Partial<ExtractedCard> {
   const out: Partial<ExtractedCard> = {};
   const lines = text.split(/\r\n|\n|\r/);

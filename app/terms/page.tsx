@@ -12,7 +12,7 @@ export default function TermsPage() {
           onClick={() => router.push("/landing")}
           className="text-lg font-bold text-[#111]"
         >
-          ScanBiz
+          KoiCard
         </button>
         <button
           onClick={() => router.back()}
@@ -31,10 +31,10 @@ export default function TermsPage() {
         <div className="flex flex-col gap-8 text-sm text-[#444] leading-relaxed">
           <section>
             <h2 className="text-base font-semibold text-[#111] mb-2">
-              1. Using ScanBiz
+              1. Using KoiCard
             </h2>
             <p>
-              ScanBiz lets you scan or upload business cards, extract contact
+              KoiCard lets you scan or upload business cards, extract contact
               details with AI, and save them to your personal contact list.
               By creating an account, you agree to use the app only for
               lawful purposes and to keep your login credentials secure.
@@ -79,7 +79,7 @@ export default function TermsPage() {
               5. Availability
             </h2>
             <p>
-              ScanBiz is provided as-is. We aim for reliable uptime but
+              KoiCard is provided as-is. We aim for reliable uptime but
               don&apos;t guarantee the service will be uninterrupted or
               error-free.
             </p>
@@ -91,7 +91,7 @@ export default function TermsPage() {
             </h2>
             <p>
               We may update these terms from time to time. Continued use of
-              ScanBiz after changes means you accept the updated terms.
+              KoiCard after changes means you accept the updated terms.
             </p>
           </section>
 

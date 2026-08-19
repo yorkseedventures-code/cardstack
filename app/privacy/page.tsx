@@ -12,7 +12,7 @@ export default function PrivacyPage() {
           onClick={() => router.push("/landing")}
           className="text-lg font-bold text-[#111]"
         >
-          ScanBiz
+          KoiCard
         </button>
         <button
           onClick={() => router.back()}
@@ -40,7 +40,7 @@ export default function PrivacyPage() {
               What we collect
             </h2>
             <p>
-              When you use ScanBiz, we store the information you give us
+              When you use KoiCard, we store the information you give us
               directly: your account details, the business card photos you
               scan or upload, and the contact details extracted from them
               (name, title, company, email, phone, LinkedIn, website, notes,
@@ -106,7 +106,7 @@ export default function PrivacyPage() {
               Contact
             </h2>
             <p>
-              Questions about this policy? Reach out to the ScanBiz team
+              Questions about this policy? Reach out to the KoiCard team
               through Yorkseed.
             </p>
           </section>

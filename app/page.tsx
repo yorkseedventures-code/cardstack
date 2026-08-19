@@ -60,7 +60,7 @@ export default function Home() {
     const headers = ["First name","Last name","Title","Company","Email","Phone","Website","LinkedIn","Where met","Follow-up","Notes","Added","Color"];
     const rows = contacts.map(c => [c.first_name,c.last_name,c.title,c.company,c.email,c.phone,c.website,c.linkedin,c.event,c.follow_up,c.notes,c.added,c.color].map(v => `"${(v||"").replace(/"/g,'""')}"`));
     const csv = [headers,...rows].map(r => r.join(",")).join("\n");
-    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "scanbiz-contacts.csv"; a.click();
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "koicard-contacts.csv"; a.click();
   };
 
   const today = new Date().toISOString().split("T")[0];

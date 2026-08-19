@@ -1,4 +1,4 @@
--- ScanBiz / CardStack: contacts table + RLS policies
+-- KoiCard / CardStack: contacts table + RLS policies
 -- Run this in Supabase: Dashboard → SQL Editor → New query → paste → Run
 
 create table if not exists contacts (

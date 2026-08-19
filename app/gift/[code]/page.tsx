@@ -58,7 +58,7 @@ export default function GiftClaimPage({ params }: { params: { code: string } }) 
             <h1 className="text-xl font-bold text-[#111] mb-2">Already claimed</h1>
             <p className="text-sm text-[#888] mb-5">This gift has already been redeemed.</p>
             <button onClick={() => router.push("/")} className="w-full py-3 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand/90 transition-all">
-              Go to ScanBiz
+              Go to KoiCard
             </button>
           </>
         )}
