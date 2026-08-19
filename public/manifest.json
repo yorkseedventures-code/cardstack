@@ -1,11 +1,11 @@
 {
-  "name": "ScanBiz",
-  "short_name": "ScanBiz",
+  "name": "KoiCard",
+  "short_name": "KoiCard",
   "description": "Scan business cards and build your network",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f8f7f5",
-  "theme_color": "#FF0A0A",
+  "background_color": "#ffffff",
+  "theme_color": "#FF7A3D",
   "orientation": "portrait",
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },

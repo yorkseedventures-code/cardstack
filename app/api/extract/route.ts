@@ -20,21 +20,17 @@ async function findLinkedIn(name: string, company: string): Promise<string> {
 
 export async function POST(req: NextRequest) {
   try {
-    const { base64, mediaType, qrText } = await req.json();
+    const { base64, mediaType } = await req.json();
     if (!base64 || !mediaType) return NextResponse.json({ error: "Missing image" }, { status: 400 });
 
-    const qrNote = qrText
-      ? ` This card also has a QR code, already decoded (client-side) to this raw text: ${JSON.stringify(qrText)}. Note that vision models cannot reliably decode QR codes visually. This text was extracted separately and is exact. If the card's only content is the QR code (nothing else visible), use this decoded text to fill in whatever fields it implies (e.g. a name, phone, email, or URL) instead of leaving everything blank. If it's a plain URL and no other field points elsewhere, put it in "website" (or "linkedin" if it's a linkedin.com URL).`
-      : "";
-
     const response = await client.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       max_tokens: 1024,
       messages: [{
         role: "user",
         content: [
           { type: "image_url", image_url: { url: `data:${mediaType};base64,${base64}`, detail: "high" } },
-          { type: "text", text: `Extract contact info from this business card. Return ONLY valid JSON with these keys (empty string if not found): {"first_name":"","last_name":"","title":"","company":"","email":"","phone":"","phone2":"","website":"","linkedin":""}. For "phone", always include the country calling code (e.g. "+1", "+44"). If the card doesn't show one explicitly but shows a country/address that implies one, infer it from that. Format as "+<code> <rest of number>". If the card lists a second, separate phone number (e.g. a mobile and an office line), put it in "phone2" using the same format; otherwise leave "phone2" as an empty string.${qrNote}` }
+          { type: "text", text: `Extract contact info from this business card. Return ONLY valid JSON with these keys (empty string if not found): {"first_name":"","last_name":"","title":"","company":"","email":"","phone":"","website":"","linkedin":""}` }
         ]
       }]
     });

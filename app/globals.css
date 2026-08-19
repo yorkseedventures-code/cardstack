@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --accent: #FF7A3D;
+  --accent-light: #fff4ef;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: #fff;
@@ -33,7 +38,7 @@ body {
   transition: box-shadow 0.15s;
   font-family: inherit;
 }
-.field-input:focus { box-shadow: 0 0 0 2px #1a1714; }
+.field-input:focus { box-shadow: 0 0 0 2px #FF7A3D; }
 .field-input::placeholder { color: #c8c0b8; }
 textarea.field-input { resize: none; min-height: 72px; }
 

@@ -2,14 +2,14 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ScanBiz",
+  title: "KoiCard",
   description: "Scan business cards. Build your network.",
   manifest: "/manifest.json",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "ScanBiz" },
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "KoiCard" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f8f7f5",
+  themeColor: "#fff",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,

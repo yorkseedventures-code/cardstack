@@ -2,7 +2,6 @@
 
 import { useRef, useState, useCallback, useEffect } from "react";
 import { ExtractedCard } from "@/lib/types";
-import { decodeQRFromDataUrl, decodeQRFromCanvas, extractFromQRText } from "@/lib/qr";
 
 interface ScannerProps {
   onExtracted: (data: ExtractedCard, imageDataUrl: string) => void;
@@ -24,32 +23,20 @@ export default function Scanner({ onExtracted }: ScannerProps) {
     }
   }, [mode]);
 
-  const emptyCard: ExtractedCard = { first_name:"",last_name:"",title:"",company:"",email:"",phone:"",phone2:"",website:"",linkedin:"" };
-
-  const processImage = useCallback(async (dataUrl: string, preDecodedQrText?: string | null) => {
+  const processImage = useCallback(async (dataUrl: string) => {
     setMode("processing");
     try {
       const base64 = dataUrl.split(",")[1];
       const mediaType = dataUrl.split(";")[0].split(":")[1];
-      // Business cards that are ONLY a QR code have nothing for the AI to read visually,
-      // so we decode the QR ourselves (jsQR runs entirely client-side) and pass the raw
-      // decoded text + whatever structured fields we could parse from it (vCard/MECARD/URL).
-      const qrText = preDecodedQrText !== undefined ? preDecodedQrText : await decodeQRFromDataUrl(dataUrl);
-      const qrFields = qrText ? extractFromQRText(qrText) : {};
-
       const res = await fetch("/api/extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ base64, mediaType, qrText }),
+        body: JSON.stringify({ base64, mediaType }),
       });
-      const aiData = await res.json();
-
-      // QR-decoded fields are exact (machine-encoded), so they take priority over the
-      // AI's visual OCR guess wherever the QR actually gave us a value.
-      const merged: ExtractedCard = { ...emptyCard, ...aiData, ...Object.fromEntries(Object.entries(qrFields).filter(([, v]) => v)) };
-      onExtracted(merged, dataUrl);
+      const data = await res.json();
+      onExtracted(data, dataUrl);
     } catch {
-      onExtracted(emptyCard, dataUrl);
+      onExtracted({ first_name:"",last_name:"",title:"",company:"",email:"",phone:"",website:"",linkedin:"" }, dataUrl);
     } finally { setMode("idle"); }
   }, [onExtracted]);
 
@@ -67,7 +54,7 @@ export default function Scanner({ onExtracted }: ScannerProps) {
       });
       streamRef.current = stream;
       setMode("camera");
-    } catch { setError("Camera not available. Use upload instead."); }
+    } catch { setError("Camera not available — use upload instead"); }
   }, []);
 
   const capturePhoto = useCallback(() => {
@@ -77,11 +64,10 @@ export default function Scanner({ onExtracted }: ScannerProps) {
     c.width = v.videoWidth || 1280;
     c.height = v.videoHeight || 720;
     c.getContext("2d")?.drawImage(v, 0, 0);
-    const qrText = decodeQRFromCanvas(c);
     const dataUrl = c.toDataURL("image/jpeg", 0.9);
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
-    processImage(dataUrl, qrText);
+    processImage(dataUrl);
   }, [processImage]);
 
   const stopCamera = useCallback(() => {
@@ -97,16 +83,16 @@ export default function Scanner({ onExtracted }: ScannerProps) {
       <div style={{ position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none" }}>
         <div style={{ position:"relative",width:"80%",height:"45%" }}>
           <div style={{ position:"absolute",inset:0,border:"1.5px solid rgba(255,255,255,0.2)",borderRadius:16 }} />
-          <div style={{ position:"absolute",top:0,left:0,width:28,height:28,borderTop:"2px solid #FF0A0A",borderLeft:"2px solid #FF0A0A",borderRadius:"12px 0 0 0" }} />
-          <div style={{ position:"absolute",top:0,right:0,width:28,height:28,borderTop:"2px solid #FF0A0A",borderRight:"2px solid #FF0A0A",borderRadius:"0 12px 0 0" }} />
-          <div style={{ position:"absolute",bottom:0,left:0,width:28,height:28,borderBottom:"2px solid #FF0A0A",borderLeft:"2px solid #FF0A0A",borderRadius:"0 0 0 12px" }} />
-          <div style={{ position:"absolute",bottom:0,right:0,width:28,height:28,borderBottom:"2px solid #FF0A0A",borderRight:"2px solid #FF0A0A",borderRadius:"0 0 12px 0" }} />
+          <div style={{ position:"absolute",top:0,left:0,width:28,height:28,borderTop:"2px solid #FF7A3D",borderLeft:"2px solid #FF7A3D",borderRadius:"12px 0 0 0" }} />
+          <div style={{ position:"absolute",top:0,right:0,width:28,height:28,borderTop:"2px solid #FF7A3D",borderRight:"2px solid #FF7A3D",borderRadius:"0 12px 0 0" }} />
+          <div style={{ position:"absolute",bottom:0,left:0,width:28,height:28,borderBottom:"2px solid #FF7A3D",borderLeft:"2px solid #FF7A3D",borderRadius:"0 0 0 12px" }} />
+          <div style={{ position:"absolute",bottom:0,right:0,width:28,height:28,borderBottom:"2px solid #FF7A3D",borderRight:"2px solid #FF7A3D",borderRadius:"0 0 12px 0" }} />
         </div>
       </div>
       <p style={{ position:"absolute",top:"18%",left:0,right:0,textAlign:"center",color:"rgba(255,255,255,0.5)",fontSize:13 }}>Position card inside the frame</p>
       <div style={{ position:"absolute",bottom:0,left:0,right:0,paddingBottom:48,paddingTop:24,display:"flex",justifyContent:"center",alignItems:"center",gap:48,background:"linear-gradient(transparent,rgba(0,0,0,0.6))" }}>
         <button onClick={stopCamera} style={{ width:48,height:48,borderRadius:"50%",background:"rgba(255,255,255,0.15)",border:"1.5px solid rgba(255,255,255,0.3)",color:"#fff",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center" }}>✕</button>
-        <button onClick={capturePhoto} style={{ width:72,height:72,borderRadius:"50%",background:"#FF0A0A",border:"4px solid rgba(255,255,255,0.3)",display:"flex",alignItems:"center",justifyContent:"center" }}>
+        <button onClick={capturePhoto} style={{ width:72,height:72,borderRadius:"50%",background:"#FF7A3D",border:"4px solid rgba(255,255,255,0.3)",display:"flex",alignItems:"center",justifyContent:"center" }}>
           <div style={{ width:44,height:44,borderRadius:"50%",background:"rgba(255,255,255,0.2)" }} />
         </button>
         <div style={{ width:48 }} />
