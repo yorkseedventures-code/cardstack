@@ -21,3 +21,19 @@ export function sanitizeContact(contact: Record<string, unknown>) {
   }
   return clean;
 }
+
+// Like sanitizeContact, but only includes fields that were actually
+// present in the input — used for partial updates (PATCH) so that
+// omitted fields aren't overwritten with empty strings.
+export function sanitizeContactPartial(contact: Record<string, unknown>) {
+  const fields = [
+    "first_name", "last_name", "title", "company",
+    "email", "phone", "phone2", "website", "linkedin",
+    "event", "follow_up", "notes", "color", "added"
+  ];
+  const clean: Record<string, string> = {};
+  for (const field of fields) {
+    if (field in contact) clean[field] = sanitize(contact[field]);
+  }
+  return clean;
+}

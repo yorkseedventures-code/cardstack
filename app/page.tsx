@@ -70,6 +70,26 @@ export default function Home() {
     }
   }, []);
 
+  const handleColorChange = useCallback(async (id: string, color: string) => {
+    const prev = contacts;
+    setContacts(c => c.map(x => x.id === id ? { ...x, color } : x)); // optimistic
+    try {
+      const res = await fetch("/api/contacts", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, color }),
+      });
+      if (!res.ok) {
+        setContacts(prev); // revert
+        const body = await res.json().catch(() => ({}));
+        setErrorMsg(body.error || `Couldn't update color (${res.status})`);
+      }
+    } catch (e) {
+      setContacts(prev); // revert
+      setErrorMsg("Couldn't reach the server. Check your connection and try again.");
+    }
+  }, [contacts]);
+
   const handleDeleted = useCallback(async (id: string) => {
     try {
       const res = await fetch("/api/contacts", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
@@ -176,7 +196,7 @@ export default function Home() {
                 {contacts.length === 0 ? "No contacts yet — scan your first card" : "No results"}
               </div>
             ) : (
-              sorted.map(c => <ContactCard key={c.id} contact={c} onDeleted={handleDeleted} />)
+              sorted.map(c => <ContactCard key={c.id} contact={c} onDeleted={handleDeleted} onColorChange={handleColorChange} />)
             )}
           </div>
         )}

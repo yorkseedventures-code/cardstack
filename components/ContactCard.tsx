@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Contact } from "@/lib/types";
-import { getColor } from "@/lib/colors";
+import { getColor, CONTACT_COLORS } from "@/lib/colors";
 
-export default function ContactCard({ contact, onDeleted }: { contact: Contact; onDeleted: (id: string) => void }) {
+export default function ContactCard({ contact, onDeleted, onColorChange }: { contact: Contact; onDeleted: (id: string) => void; onColorChange: (id: string, color: string) => void }) {
   const [expanded, setExpanded] = useState(false);
   const color = getColor(contact.color || "grey");
   const today = new Date().toISOString().split("T")[0];
@@ -42,6 +42,23 @@ export default function ContactCard({ contact, onDeleted }: { contact: Contact; 
           {contact.notes && (
             <div style={{ fontSize: 11, color: "#888", background: "#f0ede8", borderRadius: 8, padding: "8px 10px", marginBottom: 10, lineHeight: 1.5 }}>{contact.notes}</div>
           )}
+          <div style={{ marginBottom: 10 }}>
+            <div style={{ fontSize: 8, color: "#b8b0a6", fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: 6 }}>Color</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              {CONTACT_COLORS.map(c => (
+                <button
+                  key={c.id}
+                  onClick={(e) => { e.stopPropagation(); onColorChange(contact.id, c.id); }}
+                  aria-label={c.label}
+                  style={{
+                    width: 22, height: 22, borderRadius: "50%", background: c.strip,
+                    border: (contact.color || "grey") === c.id ? "2.5px solid #1a1714" : "2.5px solid transparent",
+                    cursor: "pointer", flexShrink: 0
+                  }}
+                />
+              ))}
+            </div>
+          </div>
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
             <button onClick={() => onDeleted(contact.id)} style={{ fontSize: 11, color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}>Delete</button>
           </div>

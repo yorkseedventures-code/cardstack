@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { rateLimit } from "@/lib/rate-limit";
-import { sanitizeContact } from "@/lib/sanitize";
+import { sanitizeContact, sanitizeContactPartial } from "@/lib/sanitize";
 
 function getSupabase() {
   const cookieStore = cookies();
@@ -56,6 +56,33 @@ export async function POST(req: NextRequest) {
   const { data, error } = await supabase
     .from("contacts")
     .insert({ ...contact, user_id: user.id })
+    .select()
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json(data);
+}
+
+export async function PATCH(req: NextRequest) {
+  const { allowed } = rateLimit(getIP(req), 30);
+  if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+
+  const supabase = getSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const body = await req.json();
+  const { id, ...rest } = body;
+  if (!id || typeof id !== "string") return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+
+  const updates = sanitizeContactPartial(rest);
+  if (Object.keys(updates).length === 0) return NextResponse.json({ error: "No fields to update" }, { status: 400 });
+
+  const { data, error } = await supabase
+    .from("contacts")
+    .update(updates)
+    .eq("id", id)
+    .eq("user_id", user.id)
     .select()
     .single();
 
