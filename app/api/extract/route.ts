@@ -28,9 +28,9 @@ async function findLinkedIn(name: string, company: string): Promise<string> {
 }
 
 export async function POST(req: NextRequest) {
-  // Strict rate limit for AI extraction — 10 per minute per IP
+  // Strict rate limit for AI extraction: 10 per minute per IP
   const { allowed } = rateLimit(getIP(req), 10, 60_000);
-  if (!allowed) return NextResponse.json({ error: "Too many requests — slow down" }, { status: 429 });
+  if (!allowed) return NextResponse.json({ error: "Too many requests, slow down" }, { status: 429 });
 
   try {
     const { base64, mediaType } = await req.json();

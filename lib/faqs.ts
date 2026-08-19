@@ -1,7 +1,7 @@
 export const FAQS = [
   {
     q: "How does KoiCard scan a business card?",
-    a: "Take a photo with your camera or upload one — AI reads the card and fills in name, title, company, email, phone, website, and LinkedIn automatically. You can edit anything before saving, and edit it again anytime afterward.",
+    a: "Take a photo with your camera or upload one. AI reads the card and fills in name, title, company, email, phone, website, and LinkedIn automatically. You can edit anything before saving, and edit it again anytime afterward.",
   },
   {
     q: "Does KoiCard work with QR codes and digital business cards?",
@@ -9,7 +9,7 @@ export const FAQS = [
   },
   {
     q: "Can I export my contacts?",
-    a: "Yes — export your whole contact list to CSV at any time from the Contacts tab, or set up Google Sheets sync via a Make.com webhook to auto-add every new scan to a spreadsheet.",
+    a: "Yes, export your whole contact list to CSV at any time from the Contacts tab, or set up Google Sheets sync via a Make.com webhook to auto-add every new scan to a spreadsheet.",
   },
   {
     q: "Is my data private?",
@@ -21,6 +21,6 @@ export const FAQS = [
   },
   {
     q: "Who is KoiCard for?",
-    a: "Anyone who networks in person and ends up with a pile of business cards afterward — conference attendees, startup founders, sales and BD teams, recruiters at job fairs, and students at career events.",
+    a: "Anyone who networks in person and ends up with a pile of business cards afterward: conference attendees, startup founders, sales and BD teams, recruiters at job fairs, and students at career events.",
   },
 ];

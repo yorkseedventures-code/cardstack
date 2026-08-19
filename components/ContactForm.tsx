@@ -37,16 +37,16 @@ export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset 
         <img src={imageDataUrl} alt="Card" style={{ width: "100%", maxHeight: 120, objectFit: "contain", borderRadius: 12, background: "#f7f5f2", marginBottom: 16 }} />
       )}
 
-      <div style={{ marginBottom: 6, fontSize: 10, color: "#b8b0a6", fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>AI filled this in — edit anything</div>
+      <div style={{ marginBottom: 6, fontSize: 10, color: "#b8b0a6", fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>AI filled this in, edit anything</div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
-        <div><Label>First name</Label><input className="field-input" value={form.first_name} onChange={set("first_name")} placeholder="—" /></div>
-        <div><Label>Last name</Label><input className="field-input" value={form.last_name} onChange={set("last_name")} placeholder="—" /></div>
-        <div><Label>Title</Label><input className="field-input" value={form.title} onChange={set("title")} placeholder="—" /></div>
-        <div><Label>Company</Label><input className="field-input" value={form.company} onChange={set("company")} placeholder="—" /></div>
-        <div><Label>Email</Label><input className="field-input" type="email" value={form.email} onChange={set("email")} placeholder="—" /></div>
-        <div><Label>Phone</Label><input className="field-input" type="tel" value={form.phone} onChange={set("phone")} placeholder="—" /></div>
-        <div><Label>LinkedIn</Label><input className="field-input" value={form.linkedin} onChange={set("linkedin")} placeholder="—" /></div>
+        <div><Label>First name</Label><input className="field-input" value={form.first_name} onChange={set("first_name")} placeholder="-" /></div>
+        <div><Label>Last name</Label><input className="field-input" value={form.last_name} onChange={set("last_name")} placeholder="-" /></div>
+        <div><Label>Title</Label><input className="field-input" value={form.title} onChange={set("title")} placeholder="-" /></div>
+        <div><Label>Company</Label><input className="field-input" value={form.company} onChange={set("company")} placeholder="-" /></div>
+        <div><Label>Email</Label><input className="field-input" type="email" value={form.email} onChange={set("email")} placeholder="-" /></div>
+        <div><Label>Phone</Label><input className="field-input" type="tel" value={form.phone} onChange={set("phone")} placeholder="-" /></div>
+        <div><Label>LinkedIn</Label><input className="field-input" value={form.linkedin} onChange={set("linkedin")} placeholder="-" /></div>
         <div><Label>Where met</Label><input className="field-input" value={form.event} onChange={set("event")} placeholder="e.g. Slush 2026" /></div>
       </div>
 

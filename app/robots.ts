@@ -27,7 +27,7 @@ export default function robots(): MetadataRoute.Robots {
       disallow: [
         "/api/",     // no public content, and shouldn't be crawled
         "/auth",     // login form, no unique content
-        "/gift/",    // contains single-use secret claim codes — must not be indexed
+        "/gift/",    // contains single-use secret claim codes, must not be indexed
         "/$",        // the app's root "/" is the authenticated dashboard, not marketing content (that's /landing)
       ],
     },

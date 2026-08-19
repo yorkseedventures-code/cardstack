@@ -4,7 +4,7 @@ import { SITE_URL, SITE_NAME, SITE_TAGLINE, SITE_DESCRIPTION, OG_IMAGE_PATH, OG_
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: `${SITE_NAME} — ${SITE_TAGLINE}`, template: `%s · ${SITE_NAME}` },
+  title: { default: `${SITE_NAME} · ${SITE_TAGLINE}`, template: `%s · ${SITE_NAME}` },
   description: SITE_DESCRIPTION,
   keywords: [
     "business card scanner", "digital business cards", "networking app",
@@ -20,14 +20,14 @@ export const metadata: Metadata = {
     type: "website",
     url: SITE_URL,
     siteName: SITE_NAME,
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    title: `${SITE_NAME} · ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
-    images: [{ url: OG_IMAGE_PATH, width: OG_IMAGE_WIDTH, height: OG_IMAGE_HEIGHT, alt: `${SITE_NAME} — ${SITE_TAGLINE}` }],
+    images: [{ url: OG_IMAGE_PATH, width: OG_IMAGE_WIDTH, height: OG_IMAGE_HEIGHT, alt: `${SITE_NAME} · ${SITE_TAGLINE}` }],
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    title: `${SITE_NAME} · ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
     images: [OG_IMAGE_PATH],
   },

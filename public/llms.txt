@@ -1,6 +1,6 @@
 # KoiCard
 
-> AI-powered business card scanner that turns a photo of a business card into an organized, searchable contact — instantly. Built for anyone who networks in person: conference attendees, founders, sales and BD teams, recruiters, and students.
+> AI-powered business card scanner that turns a photo of a business card into an organized, searchable contact, instantly. Built for anyone who networks in person: conference attendees, founders, sales and BD teams, recruiters, and students.
 
 KoiCard lets you take a photo (or scan a QR code / vCard) of a business card and get name, title, company, email, phone, website, and LinkedIn extracted automatically by AI. Contacts sync across devices, can be tagged with follow-up dates and urgency, color-coded, exported to CSV, or synced to Google Sheets. Accounts are free to create; heavier use during multi-day events is covered by a paid Event Pass or monthly plan.
 
@@ -10,9 +10,9 @@ KoiCard lets you take a photo (or scan a QR code / vCard) of a business card and
 - [Terms & Conditions](https://koicard.app/terms): Terms of service
 
 ## Pricing
-- Free — 20 scans per month, no credit card required
-- Event Pass — $5.99, unlimited scans for 4 days (aimed at multi-day conferences)
-- Monthly — $7.99/month, unlimited scans
+- Free: 20 scans per month, no credit card required
+- Event Pass: $5.99, unlimited scans for 4 days (aimed at multi-day conferences)
+- Monthly: $7.99/month, unlimited scans
 
 ## Key features
 - Camera or photo-upload business card scanning with AI-based field extraction

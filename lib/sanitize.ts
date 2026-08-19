@@ -29,7 +29,7 @@ export function sanitizeContact(contact: Record<string, unknown>) {
 }
 
 // Like sanitizeContact, but only includes fields that were actually
-// present in the input — used for partial updates (PATCH) so that
+// present in the input, used for partial updates (PATCH) so that
 // omitted fields aren't overwritten with empty strings.
 export function sanitizeContactPartial(contact: Record<string, unknown>) {
   const clean: Record<string, string | boolean> = {};

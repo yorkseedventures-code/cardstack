@@ -6,7 +6,7 @@ export const SITE_URL = "https://koicard.app";
 export const SITE_NAME = "KoiCard";
 export const SITE_TAGLINE = "Scan a card. Done.";
 export const SITE_DESCRIPTION =
-  "KoiCard is an AI-powered business card scanner. Snap a photo at a conference, meetup, or trade show and instantly get an organized, searchable contact — name, title, company, email, phone, and LinkedIn — with follow-up reminders and CSV or Google Sheets export.";
+  "KoiCard is an AI-powered business card scanner. Snap a photo at a conference, meetup, or trade show and instantly get an organized, searchable contact: name, title, company, email, phone, and LinkedIn, with follow-up reminders and CSV or Google Sheets export.";
 export const OG_IMAGE_PATH = "/og-image.png";
 export const OG_IMAGE_WIDTH = 1200;
 export const OG_IMAGE_HEIGHT = 630;
