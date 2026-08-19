@@ -258,11 +258,11 @@ export default function Home() {
             />
             <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
               {SORTS.map(s => (
-                <button key={s.key} onClick={() => setSort(s.key)} style={{
+                <button key={s.key} onClick={() => { setSort(s.key); setPage(1); }} style={{
                   fontSize: 11, fontWeight: 700, padding: "5px 12px", borderRadius: 20, border: "none", cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap",
                   background: sort === s.key ? "#1a1714" : "#f7f5f2",
                   color: sort === s.key ? "#fff" : "#888",
-                }} onClick={() => { setSort(s.key); setPage(1); }}>
+                }}>
                   {s.label}
                 </button>
               ))}
@@ -273,31 +273,18 @@ export default function Home() {
                 {contacts.length === 0 ? "No contacts yet, scan your first card" : "No results"}
               </div>
             ) : (
-              <div className="flex flex-col gap-0">
-                {paginated.map(c => <ContactCard key={c.id} contact={c} onDeleted={handleDeleted} onColorChange={handleColorChange} onEdited={handleEdited} />)}
-              </div>
-
-              {totalPages > 1 && (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 20, paddingTop: 16, borderTop: "0.5px solid #f0ede8" }}>
-                  <button
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    style={{ padding: "6px 14px", borderRadius: 20, border: "0.5px solid #e0dbd4", background: "#fff", fontSize: 12, color: page === 1 ? "#ccc" : "#1a1714", cursor: page === 1 ? "default" : "pointer", fontWeight: 500 }}
-                  >
-                    Prev
-                  </button>
-                  <span style={{ fontSize: 12, color: "#b8b0a6" }}>
-                    Page {page} of {totalPages} ({sorted.length} contacts)
-                  </span>
-                  <button
-                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                    disabled={page === totalPages}
-                    style={{ padding: "6px 14px", borderRadius: 20, border: "0.5px solid #e0dbd4", background: "#fff", fontSize: 12, color: page === totalPages ? "#ccc" : "#1a1714", cursor: page === totalPages ? "default" : "pointer", fontWeight: 500 }}
-                  >
-                    Next
-                  </button>
+              <div>
+                <div>
+                  {paginated.map(c => <ContactCard key={c.id} contact={c} onDeleted={handleDeleted} onColorChange={handleColorChange} onEdited={handleEdited} />)}
                 </div>
-              )}
+                {totalPages > 1 && (
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 20, paddingTop: 16, borderTop: "0.5px solid #f0ede8" }}>
+                    <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} style={{ padding: "6px 14px", borderRadius: 20, border: "0.5px solid #e0dbd4", background: "#fff", fontSize: 12, color: page === 1 ? "#ccc" : "#1a1714", cursor: page === 1 ? "default" : "pointer", fontWeight: 500 }}>Prev</button>
+                    <span style={{ fontSize: 12, color: "#b8b0a6" }}>Page {page} of {totalPages} ({sorted.length} contacts)</span>
+                    <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} style={{ padding: "6px 14px", borderRadius: 20, border: "0.5px solid #e0dbd4", background: "#fff", fontSize: 12, color: page === totalPages ? "#ccc" : "#1a1714", cursor: page === totalPages ? "default" : "pointer", fontWeight: 500 }}>Next</button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         )}
