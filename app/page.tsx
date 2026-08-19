@@ -386,6 +386,5 @@ export default function Home() {
       <AddToHomeScreen />
     </div>
     </div>
-    </div>
   );
 }
