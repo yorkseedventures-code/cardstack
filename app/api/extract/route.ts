@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
           { type: "text", text: `Extract all contact information from this business card image. Return ONLY valid JSON with these exact keys (use empty string if not found): {"first_name":"","last_name":"","title":"","company":"","email":"","phone":"","phone2":"","website":"","linkedin":"","instagram":"","x_handle":"","address":""}.
 
 Rules:
-- linkedin: capture the COMPLETE linkedin URL or handle — include every single character, do not truncate. If it starts with linkedin.com/in/ include the full path.
+- linkedin: capture the COMPLETE linkedin URL or handle - include every single character, do not truncate. If it starts with linkedin.com/in/ include the full path.
 - address: capture ANY lines that form a postal address including street number, street name, floor, suite, city, state or province, postal code, country. Include even if there is no "Address:" label. Join multiple address lines with a comma.
 - instagram: handle starting with @ or URL containing instagram.com
 - x_handle: handle starting with @ or URL containing x.com or twitter.com
