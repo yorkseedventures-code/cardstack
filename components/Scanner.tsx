@@ -36,7 +36,7 @@ export default function Scanner({ onExtracted }: ScannerProps) {
       const data = await res.json();
       onExtracted(data, dataUrl);
     } catch {
-      onExtracted({ first_name:"",last_name:"",title:"",company:"",email:"",phone:"",website:"",linkedin:"" }, dataUrl);
+      onExtracted({ first_name:"",last_name:"",title:"",company:"",email:"",phone:"",phone2:"",website:"",linkedin:"" }, dataUrl);
     } finally { setMode("idle"); }
   }, [onExtracted]);
 

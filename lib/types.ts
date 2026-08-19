@@ -7,6 +7,7 @@ export interface Contact {
   company: string;
   email: string;
   phone: string;
+  phone2: string;
   website: string;
   linkedin: string;
   event: string;
@@ -20,5 +21,5 @@ export interface Contact {
 
 export type ExtractedCard = Pick<Contact,
   "first_name" | "last_name" | "title" | "company" |
-  "email" | "phone" | "website" | "linkedin"
+  "email" | "phone" | "phone2" | "website" | "linkedin"
 >;

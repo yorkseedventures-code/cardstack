@@ -12,7 +12,7 @@ export function sanitize(value: unknown): string {
 export function sanitizeContact(contact: Record<string, unknown>) {
   const fields = [
     "first_name", "last_name", "title", "company",
-    "email", "phone", "website", "linkedin",
+    "email", "phone", "phone2", "website", "linkedin",
     "event", "follow_up", "notes", "color", "added"
   ];
   const clean: Record<string, string> = {};
