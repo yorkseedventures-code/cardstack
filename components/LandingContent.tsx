@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { FAQS } from "@/lib/faqs";
+import SignupCounter from "@/components/SignupCounter";
 
 export default function LandingContent() {
   const router = useRouter();
@@ -36,6 +37,8 @@ export default function LandingContent() {
         <p style={{ fontSize: 13, color: "#b8b0a6", lineHeight: 1.7, marginBottom: 32, maxWidth: 320 }}>
           For anyone who networks: conferences, meetups,<br />trade shows, job fairs, coffee chats.
         </p>
+
+        <SignupCounter />
 
         <button
           onClick={() => router.push("/auth")}

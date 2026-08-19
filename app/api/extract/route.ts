@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
         role: "user",
         content: [
           { type: "image_url", image_url: { url: `data:${mediaType};base64,${base64}`, detail: "high" } },
-          { type: "text", text: `Extract contact info from this business card. Return ONLY valid JSON with these exact keys (empty string if not found): {"first_name":"","last_name":"","title":"","company":"","email":"","phone":"","phone2":"","website":"","linkedin":"","instagram":"","x_handle":"","address":""}. For instagram include the @ symbol. For x_handle include the @ symbol. For address include the full address if present.` }
+          { type: "text", text: `Extract contact info from this business card. Return ONLY valid JSON with these keys (empty string if not found): {"first_name":"","last_name":"","title":"","company":"","email":"","phone":"","website":"","linkedin":""}` }
         ]
       }]
     });
