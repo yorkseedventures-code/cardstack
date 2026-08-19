@@ -24,8 +24,16 @@ export default function Home() {
   const [sort, setSort] = useState<SortOption>("date");
   const [errorMsg, setErrorMsg] = useState("");
   const [shareCopied, setShareCopied] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(480);
   const router = useRouter();
   const supabase = createClient();
+
+  useEffect(() => {
+    const updateWidth = () => setContainerWidth(window.innerWidth >= 834 ? 680 : window.innerWidth >= 600 ? 560 : 480);
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -189,7 +197,7 @@ export default function Home() {
   );
 
   return (
-    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", maxWidth: 480, margin: "0 auto" }}>
+    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", maxWidth: containerWidth, margin: "0 auto", transition: "max-width 0.2s ease" }}>
       <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "24px 20px 16px", borderBottom: "0.5px solid #f0ede8" }}>
         <div>
           <div style={{ fontSize: 26, fontWeight: 900, color: "#1a1714", letterSpacing: -1, lineHeight: 1 }}>koi<span style={{ color: "#DC2626" }}>card</span></div>
@@ -270,7 +278,7 @@ export default function Home() {
         )}
       </main>
 
-      <nav style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: 480, margin: "0 auto", background: "rgba(255,255,255,0.96)", backdropFilter: "blur(10px)", borderTop: "0.5px solid #f0ede8", display: "flex", paddingBottom: 12 }}>
+      <nav style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: containerWidth, margin: "0 auto", background: "rgba(255,255,255,0.96)", backdropFilter: "blur(10px)", borderTop: "0.5px solid #f0ede8", display: "flex", paddingTop: 8, paddingBottom: "calc(12px + env(safe-area-inset-bottom))" }}>
         {(["scan","database","settings"] as Tab[]).map(t => {
           const icons: Record<Tab, string> = { scan: "ti-scan", database: "ti-address-book", settings: "ti-settings" };
           const labels: Record<Tab, string> = { scan: "Scan", database: "Contacts", settings: "Settings" };
@@ -278,7 +286,7 @@ export default function Home() {
             <button key={t} onClick={() => { setTab(t); if (t === "scan") { setExtracted(null); setImageDataUrl(""); } }}
               style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, paddingTop: 10, background: "none", border: "none", cursor: "pointer", color: tab === t ? "#1a1714" : "#ccc" }}>
               <i className={`ti ${icons[t]}`} style={{ fontSize: 20 }} aria-hidden="true" />
-              <span style={{ fontSize: 9, fontWeight: tab === t ? 700 : 400 }}>{labels[t]}</span>
+              <span style={{ fontSize: 11, fontWeight: tab === t ? 700 : 400 }}>{labels[t]}</span>
             </button>
           );
         })}
