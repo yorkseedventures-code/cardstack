@@ -88,7 +88,20 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
           {!editing ? (
             <>
               {contact.card_image && (
-                <img src={contact.card_image} alt="Scanned card" style={{ width: "100%", maxHeight: 140, objectFit: "contain", borderRadius: 10, background: "#fff", marginBottom: 10, border: "0.5px solid #f0ede8" }} />
+                <div style={{ marginBottom: 10 }}>
+                  <img src={contact.card_image} alt="Scanned card" style={{ width: "100%", maxHeight: 140, objectFit: "contain", borderRadius: 10, background: "#fff", border: "0.5px solid #f0ede8" }} />
+                  <button
+                    onClick={() => {
+                      const a = document.createElement("a");
+                      a.href = contact.card_image!;
+                      a.download = `${contact.first_name}_${contact.last_name}_card.jpg`;
+                      a.click();
+                    }}
+                    style={{ marginTop: 6, width: "100%", padding: "7px 0", borderRadius: 20, background: "#f7f5f2", border: "none", fontSize: 11, color: "#888", fontWeight: 600, cursor: "pointer" }}
+                  >
+                    Save card image to photos
+                  </button>
+                </div>
               )}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 12, marginBottom: 10 }}>
                 {contact.email && <a href={`mailto:${contact.email}`} style={{ color: "#1a1714", textDecoration: "none" }}>✉ {contact.email}</a>}
