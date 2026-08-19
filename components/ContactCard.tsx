@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Contact } from "@/lib/types";
 import { getColor, CONTACT_COLORS } from "@/lib/colors";
+import { savePhotoToDevice } from "@/lib/savePhoto";
 
 const EDIT_FIELDS: { key: keyof Contact; label: string; type?: string }[] = [
   { key: "first_name", label: "First name" },
@@ -28,6 +29,7 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [savingPhoto, setSavingPhoto] = useState(false);
   const [form, setForm] = useState<Partial<Contact>>(contact);
   const color = getColor(contact.color || "grey");
   const today = new Date().toISOString().split("T")[0];
@@ -91,15 +93,18 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
                 <div style={{ marginBottom: 10 }}>
                   <img src={contact.card_image} alt="Scanned card" style={{ width: "100%", maxHeight: 140, objectFit: "contain", borderRadius: 10, background: "#fff", border: "0.5px solid #f0ede8" }} />
                   <button
-                    onClick={() => {
-                      const a = document.createElement("a");
-                      a.href = contact.card_image!;
-                      a.download = `${contact.first_name}_${contact.last_name}_card.jpg`;
-                      a.click();
+                    disabled={savingPhoto}
+                    onClick={async () => {
+                      setSavingPhoto(true);
+                      try {
+                        await savePhotoToDevice(contact.card_image!, `${contact.first_name}_${contact.last_name}_card.jpg`);
+                      } finally {
+                        setSavingPhoto(false);
+                      }
                     }}
-                    style={{ marginTop: 6, width: "100%", padding: "7px 0", borderRadius: 20, background: "#f7f5f2", border: "none", fontSize: 11, color: "#888", fontWeight: 600, cursor: "pointer" }}
+                    style={{ marginTop: 6, width: "100%", padding: "7px 0", borderRadius: 20, background: "#f7f5f2", border: "none", fontSize: 11, color: "#888", fontWeight: 600, cursor: "pointer", opacity: savingPhoto ? 0.6 : 1 }}
                   >
-                    Save card image to photos
+                    {savingPhoto ? "Saving..." : "Save card image to photos"}
                   </button>
                 </div>
               )}
