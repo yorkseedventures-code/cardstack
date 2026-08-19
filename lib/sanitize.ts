@@ -6,7 +6,7 @@ export function sanitize(value: unknown): string {
     .replace(/<[^>]*>/g, "") // strip HTML tags
     .replace(/[<>"'`]/g, "") // strip dangerous chars
     .trim()
-    .slice(0, 500); // max 500 chars per field
+    .slice(0, 1000); // max 1000 chars per field (was 500, too short for long URLs)
 }
 
 function sanitizeBoolean(value: unknown): boolean {
