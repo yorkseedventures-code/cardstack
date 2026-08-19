@@ -64,34 +64,4 @@ export const IN_APP_TIPS = [
     title: "Exporting",
     body: "Tap Export CSV in the Contacts tab to download your full database as a spreadsheet, including all fields and color tags.",
   },
-];  {
-    icon: "📷",
-    title: "Scanning",
-    body: "Tap 'Scan' and use your camera or upload a photo. Hold the card flat and make sure text is in frame. AI fills everything in — edit before saving.",
-  },
-  {
-    icon: "🎨",
-    title: "Color coding",
-    body: "Assign a color to each contact when saving or from the contact detail view. Use colors however works for you — by type, event, priority, or status. Name each color in Settings.",
-  },
-  {
-    icon: "📅",
-    title: "Follow-ups",
-    body: "Set a follow-up date on any contact. Overdue follow-ups are flagged in red and float to the top when you sort by Urgency.",
-  },
-  {
-    icon: "🔍",
-    title: "Finding contacts",
-    body: "Search by name, company, or event. Sort by date added, color, urgency, A-Z, or company name. With 100+ contacts, use pagination to browse.",
-  },
-  {
-    icon: "✏️",
-    title: "Editing",
-    body: "Tap any contact to expand it, then tap Edit to update any field including Instagram, X handle, and address. Changes save instantly.",
-  },
-  {
-    icon: "💾",
-    title: "Exporting",
-    body: "Tap Export CSV in the Contacts tab to download your full database as a spreadsheet, including all fields and color tags.",
-  },
 ];
