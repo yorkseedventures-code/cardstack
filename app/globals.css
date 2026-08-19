@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --accent: #FF7A3D;
+  --accent: #DC2626;
   --accent-light: #fff4ef;
 }
 
@@ -38,7 +38,7 @@ body {
   transition: box-shadow 0.15s;
   font-family: inherit;
 }
-.field-input:focus { box-shadow: 0 0 0 2px #FF7A3D; }
+.field-input:focus { box-shadow: 0 0 0 2px #DC2626; }
 .field-input::placeholder { color: #c8c0b8; }
 textarea.field-input { resize: none; min-height: 72px; }
 

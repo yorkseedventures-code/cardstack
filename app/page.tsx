@@ -97,7 +97,7 @@ export default function Home() {
     <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", maxWidth: 480, margin: "0 auto" }}>
       <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "24px 20px 16px", borderBottom: "0.5px solid #f0ede8" }}>
         <div>
-          <div style={{ fontSize: 26, fontWeight: 900, color: "#1a1714", letterSpacing: -1, lineHeight: 1 }}>koi<span style={{ color: "#FF7A3D" }}>card</span></div>
+          <div style={{ fontSize: 26, fontWeight: 900, color: "#1a1714", letterSpacing: -1, lineHeight: 1 }}>koi<span style={{ color: "#DC2626" }}>card</span></div>
           <div style={{ fontSize: 11, color: "#b8b0a6", marginTop: 2 }}>
             {contacts.length} contact{contacts.length !== 1 ? "s" : ""}
             {urgentCount > 0 ? ` · ${urgentCount} urgent` : ""}

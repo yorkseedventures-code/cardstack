@@ -83,16 +83,16 @@ export default function Scanner({ onExtracted }: ScannerProps) {
       <div style={{ position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none" }}>
         <div style={{ position:"relative",width:"80%",height:"45%" }}>
           <div style={{ position:"absolute",inset:0,border:"1.5px solid rgba(255,255,255,0.2)",borderRadius:16 }} />
-          <div style={{ position:"absolute",top:0,left:0,width:28,height:28,borderTop:"2px solid #FF7A3D",borderLeft:"2px solid #FF7A3D",borderRadius:"12px 0 0 0" }} />
-          <div style={{ position:"absolute",top:0,right:0,width:28,height:28,borderTop:"2px solid #FF7A3D",borderRight:"2px solid #FF7A3D",borderRadius:"0 12px 0 0" }} />
-          <div style={{ position:"absolute",bottom:0,left:0,width:28,height:28,borderBottom:"2px solid #FF7A3D",borderLeft:"2px solid #FF7A3D",borderRadius:"0 0 0 12px" }} />
-          <div style={{ position:"absolute",bottom:0,right:0,width:28,height:28,borderBottom:"2px solid #FF7A3D",borderRight:"2px solid #FF7A3D",borderRadius:"0 0 12px 0" }} />
+          <div style={{ position:"absolute",top:0,left:0,width:28,height:28,borderTop:"2px solid #DC2626",borderLeft:"2px solid #DC2626",borderRadius:"12px 0 0 0" }} />
+          <div style={{ position:"absolute",top:0,right:0,width:28,height:28,borderTop:"2px solid #DC2626",borderRight:"2px solid #DC2626",borderRadius:"0 12px 0 0" }} />
+          <div style={{ position:"absolute",bottom:0,left:0,width:28,height:28,borderBottom:"2px solid #DC2626",borderLeft:"2px solid #DC2626",borderRadius:"0 0 0 12px" }} />
+          <div style={{ position:"absolute",bottom:0,right:0,width:28,height:28,borderBottom:"2px solid #DC2626",borderRight:"2px solid #DC2626",borderRadius:"0 0 12px 0" }} />
         </div>
       </div>
       <p style={{ position:"absolute",top:"18%",left:0,right:0,textAlign:"center",color:"rgba(255,255,255,0.5)",fontSize:13 }}>Position card inside the frame</p>
       <div style={{ position:"absolute",bottom:0,left:0,right:0,paddingBottom:48,paddingTop:24,display:"flex",justifyContent:"center",alignItems:"center",gap:48,background:"linear-gradient(transparent,rgba(0,0,0,0.6))" }}>
         <button onClick={stopCamera} style={{ width:48,height:48,borderRadius:"50%",background:"rgba(255,255,255,0.15)",border:"1.5px solid rgba(255,255,255,0.3)",color:"#fff",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center" }}>✕</button>
-        <button onClick={capturePhoto} style={{ width:72,height:72,borderRadius:"50%",background:"#FF7A3D",border:"4px solid rgba(255,255,255,0.3)",display:"flex",alignItems:"center",justifyContent:"center" }}>
+        <button onClick={capturePhoto} style={{ width:72,height:72,borderRadius:"50%",background:"#DC2626",border:"4px solid rgba(255,255,255,0.3)",display:"flex",alignItems:"center",justifyContent:"center" }}>
           <div style={{ width:44,height:44,borderRadius:"50%",background:"rgba(255,255,255,0.2)" }} />
         </button>
         <div style={{ width:48 }} />

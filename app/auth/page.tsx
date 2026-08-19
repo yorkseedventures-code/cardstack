@@ -55,7 +55,7 @@ export default function AuthPage() {
       <div style={{ width: "100%", maxWidth: 360 }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{ fontSize: 28, fontWeight: 900, color: "#1a1714", letterSpacing: -0.8, marginBottom: 6 }}>
-            koi<span style={{ color: "#FF7A3D" }}>card</span>
+            koi<span style={{ color: "#DC2626" }}>card</span>
           </div>
           <p style={{ fontSize: 13, color: "#b8b0a6" }}>Scan cards. Build your network.</p>
         </div>
