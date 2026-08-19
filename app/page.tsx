@@ -246,7 +246,7 @@ export default function Home() {
 
       {/* Main content */}
       <div className="app-content">
-      <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
+      <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", width: "100%" }}>
       <header className="desktop-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "24px 20px 16px", borderBottom: "0.5px solid #f0ede8" }}>
         <div>
           <div style={{ fontSize: 26, fontWeight: 900, color: "#1a1714", letterSpacing: -1, lineHeight: 1 }}>koi<span style={{ color: "#DC2626" }}>card</span></div>
@@ -338,7 +338,7 @@ export default function Home() {
         )}
       </main>
 
-      <nav className="mobile-nav" style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: containerWidth, margin: "0 auto", background: "rgba(255,255,255,0.96)", backdropFilter: "blur(10px)", borderTop: "0.5px solid #f0ede8", display: "flex", paddingTop: 8, paddingBottom: "calc(12px + env(safe-area-inset-bottom))" }}>
+      <nav className="mobile-nav" style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "rgba(255,255,255,0.96)", backdropFilter: "blur(10px)", borderTop: "0.5px solid #f0ede8", display: "flex", paddingTop: 8, paddingBottom: "calc(12px + env(safe-area-inset-bottom))" }}>
         {(["scan","database","settings"] as Tab[]).map(t => {
           const icons: Record<Tab, string> = { scan: "ti-scan", database: "ti-address-book", settings: "ti-settings" };
           const labels: Record<Tab, string> = { scan: "Scan", database: "Contacts", settings: "Settings" };
