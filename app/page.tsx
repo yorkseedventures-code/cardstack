@@ -37,6 +37,12 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    // Show cached contacts instantly while fresh data loads
+    const cached = localStorage.getItem("kc_contacts_cache");
+    if (cached) {
+      try { setContacts(JSON.parse(cached)); } catch {}
+    }
+
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) router.push("/landing");
       else { setUser(user); setLoading(false); loadContacts(); }
@@ -47,7 +53,9 @@ export default function Home() {
     try {
       const res = await fetch("/api/contacts");
       if (res.ok) {
-        setContacts(await res.json());
+        const data = await res.json();
+        setContacts(data);
+        localStorage.setItem("kc_contacts_cache", JSON.stringify(data));
         setErrorMsg("");
       } else {
         const body = await res.json().catch(() => ({}));
