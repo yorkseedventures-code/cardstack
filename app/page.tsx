@@ -7,6 +7,7 @@ import Scanner from "@/components/Scanner";
 import ContactForm from "@/components/ContactForm";
 import ContactCard from "@/components/ContactCard";
 import AddToHomeScreen from "@/components/AddToHomeScreen";
+import SettingsTab from "@/components/SettingsTab";
 import { Contact, ExtractedCard } from "@/lib/types";
 import { getColor } from "@/lib/colors";
 
@@ -298,27 +299,12 @@ export default function Home() {
         )}
 
         {tab === "settings" && (
-          <div className="slide-up">
-            <div style={{ background: "#f7f5f2", borderRadius: 16, padding: 16, marginBottom: 12 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#1a1714", marginBottom: 4 }}>Account</div>
-              <div style={{ fontSize: 12, color: "#b8b0a6", marginBottom: 14 }}>{user?.email}</div>
-              <button onClick={handleSignOut} style={{ width: "100%", padding: "11px 0", borderRadius: 30, background: "#fff", border: "0.5px solid #e0dbd4", fontSize: 13, color: "#666", fontWeight: 600, cursor: "pointer" }}>
-                Sign out
-              </button>
-            </div>
-            <div style={{ background: "#f7f5f2", borderRadius: 16, padding: 16, marginBottom: 12 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#1a1714", marginBottom: 4 }}>Share</div>
-              <div style={{ fontSize: 12, color: "#b8b0a6", marginBottom: 14, lineHeight: 1.6 }}>Know someone who'd like KoiCard? Send them the app.</div>
-              <button onClick={handleShare} style={{ width: "100%", padding: "11px 0", borderRadius: 30, background: "#1a1714", border: "none", fontSize: 13, color: "#fff", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                <i className="ti ti-share-2" aria-hidden="true" />
-                {shareCopied ? "Link copied!" : "Share KoiCard"}
-              </button>
-            </div>
-            <div style={{ background: "#f7f5f2", borderRadius: 16, padding: 16 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#1a1714", marginBottom: 4 }}>About</div>
-              <div style={{ fontSize: 12, color: "#b8b0a6", lineHeight: 1.6 }}>AI-powered business card scanner. Contacts sync across all your devices.</div>
-            </div>
-          </div>
+          <SettingsTab
+            user={user}
+            onSignOut={handleSignOut}
+            onShare={handleShare}
+            shareCopied={shareCopied}
+          />
         )}
       </main>
 
