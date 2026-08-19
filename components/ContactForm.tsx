@@ -12,10 +12,15 @@ interface ContactFormProps {
 }
 
 export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset }: ContactFormProps) {
-  const [form, setForm] = useState({ ...extracted, event: "", follow_up: "", notes: "", color: "grey" });
+  const [form, setForm] = useState({
+    ...extracted, event: "", follow_up: "", notes: "", color: "grey",
+    instagram: "", x_handle: "", address: ""
+  });
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { setForm({ ...extracted, event: "", follow_up: "", notes: "", color: "grey" }); }, [extracted]);
+  useEffect(() => {
+    setForm({ ...extracted, event: "", follow_up: "", notes: "", color: "grey", instagram: "", x_handle: "", address: "" });
+  }, [extracted]);
 
   const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [key]: e.target.value }));
@@ -27,6 +32,14 @@ export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset 
     setSaving(false);
   };
 
+  const handleSaveToPhotos = () => {
+    if (!imageDataUrl) return;
+    const a = document.createElement("a");
+    a.href = imageDataUrl;
+    a.download = `${form.first_name || "card"}_${form.last_name || ""}_card.jpg`;
+    a.click();
+  };
+
   const Label = ({ children }: { children: React.ReactNode }) => (
     <div style={{ fontSize: 8, color: "#b8b0a6", fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: 4 }}>{children}</div>
   );
@@ -34,7 +47,15 @@ export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset 
   return (
     <div className="slide-up">
       {imageDataUrl && (
-        <img src={imageDataUrl} alt="Card" style={{ width: "100%", maxHeight: 120, objectFit: "contain", borderRadius: 12, background: "#f7f5f2", marginBottom: 16 }} />
+        <div style={{ marginBottom: 16 }}>
+          <img src={imageDataUrl} alt="Card" style={{ width: "100%", maxHeight: 120, objectFit: "contain", borderRadius: 12, background: "#f7f5f2" }} />
+          <button
+            onClick={handleSaveToPhotos}
+            style={{ marginTop: 6, width: "100%", padding: "7px 0", borderRadius: 20, background: "#f7f5f2", border: "none", fontSize: 11, color: "#888", fontWeight: 600, cursor: "pointer" }}
+          >
+            Save card image to photos
+          </button>
+        </div>
       )}
 
       <div style={{ marginBottom: 6, fontSize: 10, color: "#b8b0a6", fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>AI filled this in, edit anything</div>
@@ -47,9 +68,16 @@ export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset 
         <div><Label>Email</Label><input className="field-input" type="email" value={form.email} onChange={set("email")} placeholder="-" /></div>
         <div><Label>Phone</Label><input className="field-input" type="tel" value={form.phone} onChange={set("phone")} placeholder="-" /></div>
         <div><Label>Phone 2</Label><input className="field-input" type="tel" value={form.phone2} onChange={set("phone2")} placeholder="-" /></div>
-        <div><Label>Website</Label><input className="field-input" value={form.website} onChange={set("website")} placeholder="-" /></div>
         <div><Label>LinkedIn</Label><input className="field-input" value={form.linkedin} onChange={set("linkedin")} placeholder="-" /></div>
+        <div><Label>Instagram</Label><input className="field-input" value={form.instagram} onChange={set("instagram")} placeholder="@username" /></div>
+        <div><Label>X (Twitter)</Label><input className="field-input" value={form.x_handle} onChange={set("x_handle")} placeholder="@username" /></div>
+        <div><Label>Website</Label><input className="field-input" value={form.website} onChange={set("website")} placeholder="-" /></div>
         <div><Label>Where met</Label><input className="field-input" value={form.event} onChange={set("event")} placeholder="e.g. Slush 2026" /></div>
+      </div>
+
+      <div style={{ marginBottom: 10 }}>
+        <Label>Address</Label>
+        <input className="field-input" value={form.address} onChange={set("address")} placeholder="Optional" />
       </div>
 
       <div style={{ marginBottom: 10 }}>

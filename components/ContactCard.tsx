@@ -13,17 +13,32 @@ const EDIT_FIELDS: { key: keyof Contact; label: string; type?: string }[] = [
   { key: "phone", label: "Phone", type: "tel" },
   { key: "phone2", label: "Phone 2", type: "tel" },
   { key: "linkedin", label: "LinkedIn" },
+  { key: "instagram", label: "Instagram" },
+  { key: "x_handle", label: "X (Twitter)" },
   { key: "website", label: "Website" },
+  { key: "address", label: "Address" },
   { key: "event", label: "Where met" },
   { key: "follow_up", label: "Follow-up date", type: "date" },
 ];
 
-const fieldInputStyle = { width: "100%", fontSize: 12, padding: "7px 9px", borderRadius: 8, border: "1px solid #e8e6e2", background: "#fff", color: "#1a1714", outline: "none", fontFamily: "inherit" } as const;
+const fieldInputStyle = {
+  width: "100%", fontSize: 12, padding: "7px 9px", borderRadius: 8,
+  border: "1px solid #e8e6e2", background: "#fff", color: "#1a1714",
+  outline: "none", fontFamily: "inherit"
+} as const;
 
-export default function ContactCard({ contact, onDeleted, onColorChange, onEdited }: { contact: Contact; onDeleted: (id: string) => void; onColorChange: (id: string, color: string) => void; onEdited: (id: string, updates: Partial<Contact>) => Promise<boolean> }) {
+export default function ContactCard({
+  contact, onDeleted, onColorChange, onEdited
+}: {
+  contact: Contact;
+  onDeleted: (id: string) => void;
+  onColorChange: (id: string, color: string) => void;
+  onEdited: (id: string, updates: Partial<Contact>) => Promise<boolean>;
+}) {
   const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const [form, setForm] = useState<Partial<Contact>>(contact);
   const color = getColor(contact.color || "grey");
   const today = new Date().toISOString().split("T")[0];
@@ -46,8 +61,54 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
     if (ok) setEditing(false);
   };
 
+  const handleSaveToPhotos = async () => {
+    if (!contact.card_image) return;
+    try {
+      const res = await fetch(contact.card_image);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${contact.first_name}_${contact.last_name}_card.jpg`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert("Could not save image");
+    }
+  };
+
   return (
     <div>
+      {/* Delete confirmation overlay */}
+      {confirming && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 100,
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 24
+        }}>
+          <div style={{ background: "#fff", borderRadius: 20, padding: 24, maxWidth: 300, width: "100%", textAlign: "center" }}>
+            <div style={{ fontSize: 22, marginBottom: 8 }}>🗑</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#1a1714", marginBottom: 6 }}>Delete contact?</div>
+            <div style={{ fontSize: 13, color: "#b8b0a6", marginBottom: 20, lineHeight: 1.5 }}>
+              {contact.first_name} {contact.last_name} will be permanently removed. This cannot be undone.
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => setConfirming(false)}
+                style={{ flex: 1, padding: "11px 0", borderRadius: 30, background: "#f7f5f2", border: "none", fontSize: 13, color: "#888", fontWeight: 600, cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { setConfirming(false); onDeleted(contact.id); }}
+                style={{ flex: 1, padding: "11px 0", borderRadius: 30, background: "#ef4444", border: "none", fontSize: 13, color: "#fff", fontWeight: 700, cursor: "pointer" }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div
         onClick={() => setExpanded(e => !e)}
         style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 0", borderBottom: "0.5px solid #f5f2ee", cursor: "pointer" }}
@@ -69,20 +130,33 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
           {!editing ? (
             <>
               {contact.card_image && (
-                <img src={contact.card_image} alt="Scanned card" style={{ width: "100%", maxHeight: 140, objectFit: "contain", borderRadius: 10, background: "#fff", marginBottom: 10, border: "0.5px solid #f0ede8" }} />
+                <div style={{ marginBottom: 10 }}>
+                  <img src={contact.card_image} alt="Scanned card" style={{ width: "100%", maxHeight: 140, objectFit: "contain", borderRadius: 10, background: "#fff", border: "0.5px solid #f0ede8" }} />
+                  <button
+                    onClick={handleSaveToPhotos}
+                    style={{ marginTop: 6, width: "100%", padding: "7px 0", borderRadius: 20, background: "#f7f5f2", border: "none", fontSize: 11, color: "#888", fontWeight: 600, cursor: "pointer" }}
+                  >
+                    Save card image to photos
+                  </button>
+                </div>
               )}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 12, marginBottom: 10 }}>
                 {contact.email && <a href={`mailto:${contact.email}`} style={{ color: "#1a1714", textDecoration: "none" }}>✉ {contact.email}</a>}
                 {contact.phone && <a href={`tel:${contact.phone}`} style={{ color: "#1a1714", textDecoration: "none" }}>✆ {contact.phone}</a>}
-                {contact.phone2 && <a href={`tel:${contact.phone2}`} style={{ color: "#1a1714", textDecoration: "none" }}>✆ {contact.phone2} (2)</a>}
+                {contact.phone2 && <a href={`tel:${contact.phone2}`} style={{ color: "#1a1714", textDecoration: "none" }}>✆ {contact.phone2}</a>}
                 {contact.linkedin && <a href={contact.linkedin.startsWith("http") ? contact.linkedin : `https://${contact.linkedin}`} target="_blank" rel="noopener noreferrer" style={{ color: "#3b82f6", textDecoration: "none" }}>in LinkedIn</a>}
+                {contact.instagram && <a href={`https://instagram.com/${contact.instagram.replace("@","")}`} target="_blank" rel="noopener noreferrer" style={{ color: "#e1306c", textDecoration: "none" }}>📷 {contact.instagram}</a>}
+                {contact.x_handle && <a href={`https://x.com/${contact.x_handle.replace("@","")}`} target="_blank" rel="noopener noreferrer" style={{ color: "#1a1714", textDecoration: "none" }}>✕ {contact.x_handle}</a>}
                 {contact.website && <a href={contact.website.startsWith("http") ? contact.website : `https://${contact.website}`} target="_blank" rel="noopener noreferrer" style={{ color: "#1a1714", textDecoration: "none" }}>↗ {contact.website}</a>}
               </div>
+              {contact.address && (
+                <div style={{ fontSize: 11, color: "#888", marginBottom: 6 }}>📍 {contact.address}</div>
+              )}
               {contact.follow_up && (
                 <div style={{ fontSize: 11, color: dateUrgent ? "#ef4444" : "#b8b0a6", marginBottom: 6 }}>Follow-up: {contact.follow_up}</div>
               )}
               {contact.urgent && (
-                <div style={{ fontSize: 11, color: "#ef4444", fontWeight: 700, marginBottom: 6 }}>⚠ Marked urgent</div>
+                <div style={{ fontSize: 11, color: "#ef4444", fontWeight: 700, marginBottom: 6 }}>Marked urgent</div>
               )}
               {contact.notes && (
                 <div style={{ fontSize: 11, color: "#888", background: "#f0ede8", borderRadius: 8, padding: "8px 10px", marginBottom: 10, lineHeight: 1.5 }}>{contact.notes}</div>
@@ -105,33 +179,26 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
                 </div>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <button onClick={(e) => { e.stopPropagation(); startEditing(); }} style={{ fontSize: 11, color: "#1a1714", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>✎ Edit</button>
-                <button onClick={() => onDeleted(contact.id)} style={{ fontSize: 11, color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}>Delete</button>
+                <button onClick={(e) => { e.stopPropagation(); startEditing(); }} style={{ fontSize: 11, color: "#1a1714", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>Edit</button>
+                <button onClick={(e) => { e.stopPropagation(); setConfirming(true); }} style={{ fontSize: 11, color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}>Delete</button>
               </div>
             </>
           ) : (
             <div onClick={(e) => e.stopPropagation()}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
                 {EDIT_FIELDS.map(f => (
-                  <div key={f.key} style={f.key === "follow_up" ? { gridColumn: "1 / -1" } : undefined}>
+                  <div key={f.key} style={(f.key === "follow_up" || f.key === "address") ? { gridColumn: "1 / -1" } : undefined}>
                     <div style={{ fontSize: 9, color: "#b8b0a6", fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.05em", marginBottom: 3 }}>{f.label}</div>
                     {f.key === "follow_up" ? (
                       <div style={{ display: "flex", gap: 6 }}>
                         <input
-                          type={f.type || "text"}
+                          type="date"
                           value={(form[f.key] as string) || ""}
                           onChange={(e) => setForm(x => ({ ...x, [f.key]: e.target.value }))}
                           style={{ ...fieldInputStyle, flex: 1 }}
                         />
                         {form.follow_up && (
-                          <button
-                            type="button"
-                            onClick={() => setForm(x => ({ ...x, follow_up: "" }))}
-                            aria-label="Clear follow-up date"
-                            style={{ fontSize: 11, color: "#888", background: "#fff", border: "1px solid #e8e6e2", borderRadius: 8, padding: "0 12px", cursor: "pointer", fontWeight: 600 }}
-                          >
-                            Clear
-                          </button>
+                          <button type="button" onClick={() => setForm(x => ({ ...x, follow_up: "" }))} style={{ fontSize: 11, color: "#888", background: "#fff", border: "1px solid #e8e6e2", borderRadius: 8, padding: "0 12px", cursor: "pointer", fontWeight: 600 }}>Clear</button>
                         )}
                       </div>
                     ) : (
@@ -147,21 +214,10 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
               </div>
               <div style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 9, color: "#b8b0a6", fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.05em", marginBottom: 3 }}>Notes</div>
-                <textarea
-                  value={form.notes || ""}
-                  onChange={(e) => setForm(x => ({ ...x, notes: e.target.value }))}
-                  rows={3}
-                  style={{ ...fieldInputStyle, resize: "vertical" as const }}
-                />
+                <textarea value={form.notes || ""} onChange={(e) => setForm(x => ({ ...x, notes: e.target.value }))} rows={3} style={{ ...fieldInputStyle, resize: "vertical" as const }} />
               </div>
               <div style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
-                <input
-                  type="checkbox"
-                  id={`urgent-${contact.id}`}
-                  checked={!!form.urgent}
-                  onChange={(e) => setForm(x => ({ ...x, urgent: e.target.checked }))}
-                  style={{ width: 15, height: 15, accentColor: "#ef4444", cursor: "pointer" }}
-                />
+                <input type="checkbox" id={`urgent-${contact.id}`} checked={!!form.urgent} onChange={(e) => setForm(x => ({ ...x, urgent: e.target.checked }))} style={{ width: 15, height: 15, accentColor: "#ef4444", cursor: "pointer" }} />
                 <label htmlFor={`urgent-${contact.id}`} style={{ fontSize: 12, color: "#1a1714", fontWeight: 600, cursor: "pointer" }}>Mark as urgent</label>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
