@@ -11,7 +11,7 @@ import { Contact, ExtractedCard } from "@/lib/types";
 import { getColor } from "@/lib/colors";
 
 type Tab = "scan" | "database" | "settings";
-type SortOption = "date" | "color" | "urgency" | "az";
+type SortOption = "date" | "color" | "urgency" | "az" | "company";
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>("scan");
@@ -22,6 +22,7 @@ export default function Home() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("date");
+  const [page, setPage] = useState(1);
   const [errorMsg, setErrorMsg] = useState("");
   const [shareCopied, setShareCopied] = useState(false);
   const [containerWidth, setContainerWidth] = useState(480);
@@ -186,14 +187,20 @@ export default function Home() {
     if (sort === "color") return [...list].sort((a, b) => (a.color || "grey").localeCompare(b.color || "grey"));
     if (sort === "urgency") return [...list].sort((a, b) => { const ua = isUrgent(a) ? 0 : 1; const ub = isUrgent(b) ? 0 : 1; return ua - ub; });
     if (sort === "az") return [...list].sort((a, b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`));
+    if (sort === "company") return [...list].sort((a, b) => (a.company || "").localeCompare(b.company || ""));
     return list;
   }, [contacts, search, sort, today]);
+
+  const PAGE_SIZE = 100;
+  const totalPages = Math.ceil(sorted.length / PAGE_SIZE);
+  const paginated = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const SORTS: { key: SortOption; label: string }[] = [
     { key: "date", label: "Date added" },
     { key: "color", label: "By color" },
     { key: "urgency", label: "Urgency" },
-    { key: "az", label: "A–Z" },
+    { key: "az", label: "A-Z" },
+    { key: "company", label: "Company" },
   ];
 
   if (loading) return (
@@ -289,7 +296,7 @@ export default function Home() {
             )}
             <input
               style={{ width: "100%", background: "#f7f5f2", border: "none", borderRadius: 30, padding: "9px 16px", fontSize: 13, color: "#1a1714", outline: "none", marginBottom: 14, fontFamily: "inherit" }}
-              value={search} onChange={e => setSearch(e.target.value)} placeholder="Search contacts"
+              value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder="Search contacts"
             />
             <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
               {SORTS.map(s => (
@@ -297,7 +304,7 @@ export default function Home() {
                   fontSize: 11, fontWeight: 700, padding: "5px 12px", borderRadius: 20, border: "none", cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap",
                   background: sort === s.key ? "#1a1714" : "#f7f5f2",
                   color: sort === s.key ? "#fff" : "#888",
-                }}>
+                }} onClick={() => { setSort(s.key); setPage(1); }}>
                   {s.label}
                 </button>
               ))}
@@ -308,7 +315,31 @@ export default function Home() {
                 {contacts.length === 0 ? "No contacts yet, scan your first card" : "No results"}
               </div>
             ) : (
-              sorted.map(c => <ContactCard key={c.id} contact={c} onDeleted={handleDeleted} onColorChange={handleColorChange} onEdited={handleEdited} />)
+              <div className="flex flex-col gap-0">
+                {paginated.map(c => <ContactCard key={c.id} contact={c} onDeleted={handleDeleted} onColorChange={handleColorChange} onEdited={handleEdited} />)}
+              </div>
+
+              {totalPages > 1 && (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 20, paddingTop: 16, borderTop: "0.5px solid #f0ede8" }}>
+                  <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    style={{ padding: "6px 14px", borderRadius: 20, border: "0.5px solid #e0dbd4", background: "#fff", fontSize: 12, color: page === 1 ? "#ccc" : "#1a1714", cursor: page === 1 ? "default" : "pointer", fontWeight: 500 }}
+                  >
+                    Prev
+                  </button>
+                  <span style={{ fontSize: 12, color: "#b8b0a6" }}>
+                    Page {page} of {totalPages} ({sorted.length} contacts)
+                  </span>
+                  <button
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    style={{ padding: "6px 14px", borderRadius: 20, border: "0.5px solid #e0dbd4", background: "#fff", fontSize: 12, color: page === totalPages ? "#ccc" : "#1a1714", cursor: page === totalPages ? "default" : "pointer", fontWeight: 500 }}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             )}
           </div>
         )}
