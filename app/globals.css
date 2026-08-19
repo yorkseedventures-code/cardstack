@@ -4,7 +4,7 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #f7f5f2;
+  background: #fff;
   color: #1a1714;
   min-height: 100dvh;
 }
@@ -35,6 +35,69 @@ body {
 }
 .field-input:focus { border-color: #FF7A3D; }
 .field-input::placeholder { color: #c8c0b8; }
+textarea.field-input { resize: none; min-height: 72px; }
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #e0dbd4; border-radius: 2px; }
+
+/* Desktop layout - mobile first */
+.app-shell {
+  display: block;
+  min-height: 100dvh;
+  background: #fff;
+}
+
+.app-sidebar {
+  display: none;
+}
+
+.app-content {
+  display: block;
+  width: 100%;
+  background: #fff;
+  min-height: 100dvh;
+}
+
+@media (min-width: 900px) {
+  body { background: #f7f5f2; }
+
+  .app-shell {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px;
+    gap: 28px;
+    align-items: flex-start;
+    background: transparent;
+    min-height: 100dvh;
+  }
+
+  .app-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 32px;
+    min-height: calc(100vh - 64px);
+  }
+
+  .app-content {
+    flex: 1;
+    max-width: 700px;
+    border-radius: 20px;
+    border: 0.5px solid #ece9e4;
+    min-height: calc(100vh - 64px);
+    box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .mobile-nav { display: none !important; }
+  .desktop-header { padding: 28px 32px 16px !important; }
+  .desktop-main { padding: 24px 32px 40px !important; }
+}.field-input::placeholder { color: #c8c0b8; }
 textarea.field-input { resize: none; min-height: 72px; }
 
 ::-webkit-scrollbar { width: 3px; }
