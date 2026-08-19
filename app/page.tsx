@@ -7,7 +7,7 @@ import Scanner from "@/components/Scanner";
 import ContactForm from "@/components/ContactForm";
 import ContactCard from "@/components/ContactCard";
 import { Contact, ExtractedCard } from "@/lib/types";
-import { getColor } from "@/lib/colors";
+import { getColor, CONTACT_COLORS } from "@/lib/colors";
 
 type Tab = "scan" | "database" | "settings";
 type SortOption = "date" | "color" | "urgency" | "az";
@@ -21,6 +21,7 @@ export default function Home() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("date");
+  const [colorFilter, setColorFilter] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
 
@@ -78,12 +79,13 @@ export default function Home() {
       const q = search.toLowerCase();
       return [c.first_name,c.last_name,c.company,c.email,c.event].some(v => v?.toLowerCase().includes(q));
     });
+    if (colorFilter) list = list.filter(c => (c.color || "grey") === colorFilter);
     if (sort === "date") return [...list].sort((a, b) => b.added?.localeCompare(a.added || "") || 0);
     if (sort === "color") return [...list].sort((a, b) => (a.color || "grey").localeCompare(b.color || "grey"));
     if (sort === "urgency") return [...list].sort((a, b) => { const ua = a.follow_up && a.follow_up <= today ? 0 : 1; const ub = b.follow_up && b.follow_up <= today ? 0 : 1; return ua - ub; });
     if (sort === "az") return [...list].sort((a, b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`));
     return list;
-  }, [contacts, search, sort, today]);
+  }, [contacts, search, sort, colorFilter, today]);
 
   const SORTS: { key: SortOption; label: string }[] = [
     { key: "date", label: "Date added" },
@@ -128,7 +130,7 @@ export default function Home() {
               style={{ width: "100%", background: "#f7f5f2", border: "none", borderRadius: 30, padding: "9px 16px", fontSize: 13, color: "#1a1714", outline: "none", marginBottom: 14, fontFamily: "inherit" }}
               value={search} onChange={e => setSearch(e.target.value)} placeholder="Search contacts"
             />
-            <div style={{ display: "flex", gap: 6, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
+            <div style={{ display: "flex", gap: 6, marginBottom: 12, overflowX: "auto", paddingBottom: 4 }}>
               {SORTS.map(s => (
                 <button key={s.key} onClick={() => setSort(s.key)} style={{
                   fontSize: 11, fontWeight: 700, padding: "5px 12px", borderRadius: 20, border: "none", cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap",
@@ -140,9 +142,34 @@ export default function Home() {
               ))}
             </div>
 
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
+              <button
+                onClick={() => setColorFilter(null)}
+                style={{
+                  fontSize: 10, fontWeight: 700, padding: "4px 10px", borderRadius: 20, border: "none", cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap",
+                  background: colorFilter === null ? "#1a1714" : "#f7f5f2",
+                  color: colorFilter === null ? "#fff" : "#888",
+                }}
+              >
+                All
+              </button>
+              {CONTACT_COLORS.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => setColorFilter(prev => prev === c.id ? null : c.id)}
+                  title={c.label}
+                  style={{
+                    width: 22, height: 22, borderRadius: "50%", background: c.strip, flexShrink: 0, cursor: "pointer",
+                    border: colorFilter === c.id ? "2.5px solid #1a1714" : "2.5px solid transparent",
+                    boxShadow: colorFilter === c.id ? "none" : "0 0 0 1px #f0ede8",
+                  }}
+                />
+              ))}
+            </div>
+
             {sorted.length === 0 ? (
               <div style={{ textAlign: "center", padding: "60px 0", color: "#b8b0a6", fontSize: 14 }}>
-                {contacts.length === 0 ? "No contacts yet. Scan your first card" : "No results"}
+                {contacts.length === 0 ? "No contacts yet. Scan your first card" : colorFilter ? "No contacts with this color yet" : "No results"}
               </div>
             ) : (
               sorted.map(c => <ContactCard key={c.id} contact={c} onDeleted={handleDeleted} />)
