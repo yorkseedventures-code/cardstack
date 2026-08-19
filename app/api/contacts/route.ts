@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { rateLimit } from "@/lib/rate-limit";
+import { sanitizeContact } from "@/lib/sanitize";
 
 function getSupabase() {
   const cookieStore = cookies();
@@ -18,7 +20,14 @@ function getSupabase() {
   );
 }
 
-export async function GET() {
+function getIP(req: NextRequest): string {
+  return req.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
+}
+
+export async function GET(req: NextRequest) {
+  const { allowed } = rateLimit(getIP(req), 60);
+  if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+
   const supabase = getSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -34,11 +43,16 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const { allowed } = rateLimit(getIP(req), 30);
+  if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+
   const supabase = getSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const contact = await req.json();
+  const body = await req.json();
+  const contact = sanitizeContact(body);
+
   const { data, error } = await supabase
     .from("contacts")
     .insert({ ...contact, user_id: user.id })
@@ -50,11 +64,16 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const { allowed } = rateLimit(getIP(req), 30);
+  if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+
   const supabase = getSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await req.json();
+  if (!id || typeof id !== "string") return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+
   const { error } = await supabase
     .from("contacts")
     .delete()

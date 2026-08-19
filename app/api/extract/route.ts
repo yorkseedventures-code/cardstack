@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { rateLimit } from "@/lib/rate-limit";
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+function getIP(req: NextRequest): string {
+  return req.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
+}
 
 async function findLinkedIn(name: string, company: string): Promise<string> {
   try {
@@ -19,12 +24,24 @@ async function findLinkedIn(name: string, company: string): Promise<string> {
 }
 
 export async function POST(req: NextRequest) {
+  // Strict rate limit for AI extraction — 10 per minute per IP
+  const { allowed } = rateLimit(getIP(req), 10, 60_000);
+  if (!allowed) return NextResponse.json({ error: "Too many requests — slow down" }, { status: 429 });
+
   try {
     const { base64, mediaType } = await req.json();
+
+    // Validate inputs
     if (!base64 || !mediaType) return NextResponse.json({ error: "Missing image" }, { status: 400 });
+    if (!["image/jpeg", "image/png", "image/webp"].includes(mediaType)) {
+      return NextResponse.json({ error: "Invalid image type" }, { status: 400 });
+    }
+    if (base64.length > 10_000_000) {
+      return NextResponse.json({ error: "Image too large" }, { status: 400 });
+    }
 
     const response = await client.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       max_tokens: 1024,
       messages: [{
         role: "user",
