@@ -62,7 +62,9 @@ export default function Home() {
         setErrorMsg(body.error || `Failed to load contacts (${res.status})`);
       }
     } catch (e) {
-      setErrorMsg("Couldn't reach the server. Check your connection and try again.");
+      // Only show error if we have no cached data to show
+      const cached = localStorage.getItem("kc_contacts_cache");
+      if (!cached) setErrorMsg("Couldn't reach the server. Check your connection and try again.");
     }
   };
 
