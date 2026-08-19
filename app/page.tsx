@@ -253,7 +253,6 @@ export default function Home() {
 
       {/* Main content */}
       <div className="app-content">
-      <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", width: "100%" }}>
       <header className="desktop-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "24px 20px 16px", borderBottom: "0.5px solid #f0ede8" }}>
         <div>
           <div style={{ fontSize: 26, fontWeight: 900, color: "#1a1714", letterSpacing: -1, lineHeight: 1 }}>koi<span style={{ color: "#DC2626" }}>card</span></div>
