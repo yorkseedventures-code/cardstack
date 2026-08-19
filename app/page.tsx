@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Scanner from "@/components/Scanner";
 import ContactForm from "@/components/ContactForm";
 import ContactCard from "@/components/ContactCard";
+import AddToHomeScreen from "@/components/AddToHomeScreen";
 import { Contact, ExtractedCard } from "@/lib/types";
 import { getColor } from "@/lib/colors";
 
@@ -22,6 +23,7 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("date");
   const [errorMsg, setErrorMsg] = useState("");
+  const [shareCopied, setShareCopied] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -131,6 +133,23 @@ export default function Home() {
 
   const handleSignOut = async () => { await supabase.auth.signOut(); router.push("/landing"); };
 
+  const handleShare = async () => {
+    const shareData = {
+      title: "KoiCard",
+      text: "Scan business cards and build your network with KoiCard.",
+      url: "https://koicard.app",
+    };
+    if (navigator.share) {
+      try { await navigator.share(shareData); } catch {}
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareData.url);
+        setShareCopied(true);
+        setTimeout(() => setShareCopied(false), 2000);
+      } catch {}
+    }
+  };
+
   const exportCSV = () => {
     const headers = ["First name","Last name","Title","Company","Email","Phone","Website","LinkedIn","Where met","Follow-up","Notes","Added","Color"];
     const rows = contacts.map(c => [c.first_name,c.last_name,c.title,c.company,c.email,c.phone,c.website,c.linkedin,c.event,c.follow_up,c.notes,c.added,c.color].map(v => `"${(v||"").replace(/"/g,'""')}"`));
@@ -235,6 +254,14 @@ export default function Home() {
                 Sign out
               </button>
             </div>
+            <div style={{ background: "#f7f5f2", borderRadius: 16, padding: 16, marginBottom: 12 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#1a1714", marginBottom: 4 }}>Share</div>
+              <div style={{ fontSize: 12, color: "#b8b0a6", marginBottom: 14, lineHeight: 1.6 }}>Know someone who'd like KoiCard? Send them the app.</div>
+              <button onClick={handleShare} style={{ width: "100%", padding: "11px 0", borderRadius: 30, background: "#1a1714", border: "none", fontSize: 13, color: "#fff", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                <i className="ti ti-share-2" aria-hidden="true" />
+                {shareCopied ? "Link copied!" : "Share KoiCard"}
+              </button>
+            </div>
             <div style={{ background: "#f7f5f2", borderRadius: 16, padding: 16 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: "#1a1714", marginBottom: 4 }}>About</div>
               <div style={{ fontSize: 12, color: "#b8b0a6", lineHeight: 1.6 }}>AI-powered business card scanner. Contacts sync across all your devices.</div>
@@ -256,6 +283,8 @@ export default function Home() {
           );
         })}
       </nav>
+
+      <AddToHomeScreen />
     </div>
   );
 }
