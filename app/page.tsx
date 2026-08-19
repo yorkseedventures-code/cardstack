@@ -338,7 +338,7 @@ export default function Home() {
         )}
       </main>
 
-      <nav style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: containerWidth, margin: "0 auto", background: "rgba(255,255,255,0.96)", backdropFilter: "blur(10px)", borderTop: "0.5px solid #f0ede8", display: "flex", paddingTop: 8, paddingBottom: "calc(12px + env(safe-area-inset-bottom))" }}>
+      <nav className="mobile-nav" style={{ position: "fixed", bottom: 0, left: 0, right: 0, maxWidth: containerWidth, margin: "0 auto", background: "rgba(255,255,255,0.96)", backdropFilter: "blur(10px)", borderTop: "0.5px solid #f0ede8", display: "flex", paddingTop: 8, paddingBottom: "calc(12px + env(safe-area-inset-bottom))" }}>
         {(["scan","database","settings"] as Tab[]).map(t => {
           const icons: Record<Tab, string> = { scan: "ti-scan", database: "ti-address-book", settings: "ti-settings" };
           const labels: Record<Tab, string> = { scan: "Scan", database: "Contacts", settings: "Settings" };
@@ -353,6 +353,8 @@ export default function Home() {
       </nav>
 
       <AddToHomeScreen />
+    </div>
+    </div>
     </div>
   );
 }
