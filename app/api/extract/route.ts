@@ -36,13 +36,12 @@ async function findLinkedIn(name: string, company: string): Promise<string> {
     const apiKey = process.env.GOOGLE_API_KEY;
     const cseId = process.env.GOOGLE_CSE_ID;
     if (!apiKey || !cseId) return "";
-    const query = `${name} ${company}`.trim();
-    const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cseId}&q=${encodeURIComponent(query)}&num=1`;
+    const query = `site:linkedin.com/in ${name} ${company}`.trim();
+    const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cseId}&q=${encodeURIComponent(query)}&num=3`;
     const res = await fetch(url);
     const data = await res.json();
-    const item = data.items?.[0];
-    if (item?.link?.includes("linkedin.com/in/")) return item.link;
-    return "";
+    const item = data.items?.find((i: any) => i.link?.includes("linkedin.com/in/"));
+    return item?.link || "";
   } catch { return ""; }
 }
 
@@ -93,7 +92,7 @@ export async function POST(req: NextRequest) {
 
 Rules:
 - linkedin: capture the COMPLETE linkedin URL or handle - include every single character, do not truncate. If it starts with linkedin.com/in/ include the full path.
-- address: capture ANY lines that form a postal address including street number, street name, floor, suite, city, state or province, postal code, country. Include even if there is no "Address:" label. Join multiple address lines with a comma.
+- address: capture ANY lines that form a postal address including street number, street name, floor, suite, city, state or province, postal code, country. Include even if there is no "Address:" label. Examples of unlabeled addresses on cards: "123 Main St, New York, NY 10001" or "Level 4, 10 Bridge St, Sydney NSW 2000" or "Suite 500, 1 King St W, Toronto ON M5H 1A1". Join multiple address lines with a comma. If you see a number followed by a street name anywhere on the card, treat it as an address.
 - instagram: handle starting with @ or URL containing instagram.com
 - x_handle: handle starting with @ or URL containing x.com or twitter.com
 - phone2: second phone number if a second one is present
