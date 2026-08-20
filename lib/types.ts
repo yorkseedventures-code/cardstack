@@ -20,6 +20,9 @@ export interface Contact {
   color: string;
   urgent?: boolean;
   card_image?: string;
+  card_image_path?: string;
+  image_migrated_at?: string;
+  image_error?: boolean;
   created_at?: string;
 }
 

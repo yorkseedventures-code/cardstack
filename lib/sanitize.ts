@@ -37,7 +37,6 @@ export function sanitizeContact(contact: Record<string, unknown>) {
     clean[field] = sanitize(contact[field]);
   }
   clean.urgent = sanitizeBoolean(contact.urgent);
-  clean.card_image = sanitizeCardImage(contact.card_image);
   return clean;
 }
 
@@ -50,6 +49,5 @@ export function sanitizeContactPartial(contact: Record<string, unknown>) {
     if (field in contact) clean[field] = sanitize(contact[field]);
   }
   if ("urgent" in contact) clean.urgent = sanitizeBoolean(contact.urgent);
-  if ("card_image" in contact) clean.card_image = sanitizeCardImage(contact.card_image);
   return clean;
 }
