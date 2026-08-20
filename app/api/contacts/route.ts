@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
         try { await deleteCardImage(supabase, uploadedPath); }
         catch (cleanupErr) { console.error("Failed to clean up orphaned card image", cleanupErr); }
       }
-      data.image_error = true;
+      (data as typeof data & { image_error?: boolean }).image_error = true;
     }
   }
   return NextResponse.json(data);

@@ -4,7 +4,7 @@ const TARGET_BYTES = 250 * 1024;
 const MAX_EDGE = 1800;
 
 export function dataUrlToBuffer(dataUrl: string): Buffer {
-  const match = dataUrl.match(/^data:image\/[a-zA-Z0-9.+-]+;base64,(.+)$/s);
+  const match = dataUrl.match(/^data:image\/[a-zA-Z0-9.+-]+;base64,([\s\S]+)$/);
   if (!match) throw new Error("Invalid image data URL");
   return Buffer.from(match[1], "base64");
 }
