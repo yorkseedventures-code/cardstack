@@ -28,13 +28,36 @@ export default function SettingsTab({ user, onSignOut, onShare, shareCopied }: S
   const [openTip, setOpenTip] = useState<number | null>(null);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("kc_color_labels");
-      if (saved) setLabels({ ...DEFAULT_LABELS, ...JSON.parse(saved) });
-    } catch {}
+    // Load from Supabase, fall back to localStorage
+    fetch("/api/preferences")
+      .then(r => r.json())
+      .then(d => {
+        if (d.color_labels && Object.keys(d.color_labels).length > 0) {
+          setLabels({ ...DEFAULT_LABELS, ...d.color_labels });
+        } else {
+          // Try localStorage fallback
+          try {
+            const saved = localStorage.getItem("kc_color_labels");
+            if (saved) setLabels({ ...DEFAULT_LABELS, ...JSON.parse(saved) });
+          } catch {}
+        }
+      })
+      .catch(() => {
+        try {
+          const saved = localStorage.getItem("kc_color_labels");
+          if (saved) setLabels({ ...DEFAULT_LABELS, ...JSON.parse(saved) });
+        } catch {}
+      });
   }, []);
 
-  const saveLabels = () => {
+  const saveLabels = async () => {
+    // Save to Supabase
+    await fetch("/api/preferences", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ color_labels: labels }),
+    });
+    // Also save to localStorage as cache
     localStorage.setItem("kc_color_labels", JSON.stringify(labels));
     setLabelsSaved(true);
     setTimeout(() => setLabelsSaved(false), 2000);
