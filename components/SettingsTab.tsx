@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { CONTACT_COLORS } from "@/lib/colors";
 import { IN_APP_TIPS, FAQS } from "@/lib/faqs";
+import { loadColorLabels, setCachedLabels } from "@/lib/colorLabels";
 
 const DEFAULT_LABELS: Record<string, string> = {
   grey: "",
@@ -24,41 +25,31 @@ interface SettingsTabProps {
 export default function SettingsTab({ user, onSignOut, onShare, shareCopied }: SettingsTabProps) {
   const [labels, setLabels] = useState<Record<string, string>>(DEFAULT_LABELS);
   const [labelsSaved, setLabelsSaved] = useState(false);
+  const [labelsError, setLabelsError] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [openTip, setOpenTip] = useState<number | null>(null);
 
   useEffect(() => {
-    // Load from Supabase, fall back to localStorage
-    fetch("/api/preferences")
-      .then(r => r.json())
-      .then(d => {
-        if (d.color_labels && Object.keys(d.color_labels).length > 0) {
-          setLabels({ ...DEFAULT_LABELS, ...d.color_labels });
-        } else {
-          // Try localStorage fallback
-          try {
-            const saved = localStorage.getItem("kc_color_labels");
-            if (saved) setLabels({ ...DEFAULT_LABELS, ...JSON.parse(saved) });
-          } catch {}
-        }
-      })
-      .catch(() => {
-        try {
-          const saved = localStorage.getItem("kc_color_labels");
-          if (saved) setLabels({ ...DEFAULT_LABELS, ...JSON.parse(saved) });
-        } catch {}
-      });
+    // Server is the source of truth; localStorage is only a fallback if the server can't be reached.
+    loadColorLabels(true)
+      .then(l => setLabels({ ...DEFAULT_LABELS, ...l }))
+      .catch(() => {});
   }, []);
 
   const saveLabels = async () => {
-    // Save to Supabase
-    await fetch("/api/preferences", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ color_labels: labels }),
-    });
-    // Also save to localStorage as cache
-    localStorage.setItem("kc_color_labels", JSON.stringify(labels));
+    setLabelsError("");
+    setCachedLabels(labels);
+    try {
+      const res = await fetch("/api/preferences", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ color_labels: labels }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      setLabelsError("Couldn't save to your account. Saved on this device only, try again.");
+      return;
+    }
     setLabelsSaved(true);
     setTimeout(() => setLabelsSaved(false), 2000);
   };
@@ -106,6 +97,7 @@ export default function SettingsTab({ user, onSignOut, onShare, shareCopied }: S
         <button onClick={saveLabels} style={{ width: "100%", padding: "10px 0", borderRadius: 30, background: "#1a1714", border: "none", fontSize: 13, color: "#fff", fontWeight: 600, cursor: "pointer" }}>
           {labelsSaved ? "Saved!" : "Save labels"}
         </button>
+        {labelsError && <p style={{ color: "#dc2626", fontSize: 12, marginTop: 8, textAlign: "center" }}>{labelsError}</p>}
       </>)}
 
       {/* How to use */}

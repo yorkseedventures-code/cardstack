@@ -1,4 +1,4 @@
-import { FREE_SCANS_PER_MONTH, PASS_PRICE, MONTHLY_PRICE, PRICING } from "./pricing";
+import { FREE_SCANS_PER_MONTH, PASS_PRICE, MONTHLY_PRICE, PRICING, MINI_PRICE, MINI_SCANS, SUPPORT_EMAIL } from "./pricing";
 
 export const FAQS = [
   {
@@ -11,15 +11,15 @@ export const FAQS = [
   },
   {
     q: "What are the color tags for?",
-    a: "Color tags are yours to define. Use them however makes sense for your workflow - by relationship type (investor, client, press), by event, by priority, or by follow-up status. You can rename each color in Settings.",
+    a: "Color tags are yours to define. Use them however makes sense for your workflow - by relationship type (investor, client, press), by event, by priority, or by follow-up status. Name each color in Settings (for example blue = Investor), and your names are saved to your account, shown on your contacts, and included in your CSV export.",
   },
   {
-    q: "Does KoiCard find LinkedIn automatically?",
-    a: "Yes. If LinkedIn isn't printed on the card, KoiCard searches for the person's profile automatically using their name and company. You can edit or clear the result before saving.",
+    q: "Does KoiCard find LinkedIn?",
+    a: "KoiCard reads the LinkedIn link or handle when it is printed on the card. If it isn't printed, you can paste the profile link in yourself before saving.",
   },
   {
     q: "Can I export my contacts?",
-    a: "Yes. Export your full contact list to CSV anytime from the Contacts tab. Every column, including color tag and follow-up date, is included.",
+    a: "Yes. Export your full contact list to CSV anytime from the Contacts tab. Every column, including color tag, your color label and follow-up date, is included.",
   },
   {
     q: "Is my data private?",
@@ -27,7 +27,19 @@ export const FAQS = [
   },
   {
     q: "How much does KoiCard cost?",
-    a: `Free for ${FREE_SCANS_PER_MONTH} scans a month. An Event Pass (${PASS_PRICE}, valid ${PRICING.pass.durationDays} days) is perfect for conferences. A Monthly plan (${MONTHLY_PRICE}/month) covers unlimited scanning year-round.`,
+    a: `Free for ${FREE_SCANS_PER_MONTH} scans a month. An Event Pass (${PASS_PRICE}, valid ${PRICING.pass.durationDays} days, up to ${PRICING.pass.scanCap} scans) is perfect for conferences. A Monthly plan (${MONTHLY_PRICE}/month, up to ${PRICING.monthly.scanCap} scans a month) covers year-round use. Run out of scans? A Mini Pass adds ${MINI_SCANS} more for ${MINI_PRICE}.`,
+  },
+  {
+    q: "What happens when I run out of scans?",
+    a: `You'll see a pop-up with options to keep going. Free users get ${FREE_SCANS_PER_MONTH} scans a month, and an Event Pass or Monthly plan has its own scan limit. Anyone can add a Mini Pass (${MINI_PRICE} for ${MINI_SCANS} more scans, valid ${PRICING.mini.validDays} days). Your saved contacts are never locked, only new scans. Need more than that? Email ${SUPPORT_EMAIL}.`,
+  },
+  {
+    q: "How do the Event Pass, Monthly plan and Mini Pass work?",
+    a: `Event Pass: one payment of ${PASS_PRICE}, up to ${PRICING.pass.scanCap} scans over ${PRICING.pass.durationDays} days, does not renew. Monthly: ${MONTHLY_PRICE}/month, up to ${PRICING.monthly.scanCap} scans a month, renews until cancelled. Mini Pass: one payment of ${MINI_PRICE} adds ${MINI_SCANS} scans on top of what you already have, valid ${PRICING.mini.validDays} days, does not renew. Passes can be bought again whenever you need.`,
+  },
+  {
+    q: "How do I cancel or get help with a payment?",
+    a: `Email ${SUPPORT_EMAIL} and we'll cancel your Monthly plan or sort out a payment problem. Cancelling stops future renewals; you keep access until the end of the period you've paid for.`,
   },
   {
     q: "Who is KoiCard for?",
@@ -44,7 +56,17 @@ export const IN_APP_TIPS = [
   {
     icon: "🎨",
     title: "Color coding",
-    body: "Assign a color to each contact when saving or from the contact detail view. Use colors however works for you - by type, event, priority, or status. Name each color in Settings.",
+    body: "Assign a color to each contact when saving or from the contact detail view. Use colors however works for you - by type, event, priority, or status. Name each color in Settings (your names are saved to your account and appear in your CSV export).",
+  },
+  {
+    icon: "🎟️",
+    title: "Scan limits and passes",
+    body: `Free accounts get ${FREE_SCANS_PER_MONTH} scans a month. When you run out, pick a Monthly plan, an Event Pass for a conference, or a Mini Pass (${MINI_SCANS} more scans for ${MINI_PRICE}). Saved contacts are never locked.`,
+  },
+  {
+    icon: "🔗",
+    title: "LinkedIn",
+    body: "KoiCard reads LinkedIn when it's printed on the card. If it isn't, tap Edit on the contact and paste the profile link.",
   },
   {
     icon: "📅",
@@ -64,6 +86,6 @@ export const IN_APP_TIPS = [
   {
     icon: "💾",
     title: "Exporting",
-    body: "Tap Export CSV in the Contacts tab to download your full database as a spreadsheet, including all fields and color tags.",
+    body: "Tap Export CSV in the Contacts tab to download your full database as a spreadsheet, including all fields, color tags and your color label names.",
   },
 ];

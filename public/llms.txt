@@ -2,7 +2,7 @@
 
 > AI-powered business card scanner that turns a photo of a business card into an organized, searchable contact, instantly. Built for anyone who networks in person: conference attendees, founders, sales and BD teams, recruiters, and students.
 
-KoiCard lets you take a photo (or scan a QR code / vCard) of a business card and get name, title, company, email, phone, website, and LinkedIn extracted automatically by AI. Contacts sync across devices, can be tagged with follow-up dates and urgency, color-coded, exported to CSV, or synced to Google Sheets. Accounts are free to create; heavier use during multi-day events is covered by a paid Event Pass or monthly plan.
+KoiCard lets you take a photo (or scan a QR code / vCard) of a business card and get name, title, company, email, phone, website, and LinkedIn (when printed) extracted automatically by AI. Contacts sync across devices, can be tagged with follow-up dates and urgency, color-coded, exported to CSV, or synced to Google Sheets. Accounts are free to create; heavier use during multi-day events is covered by a paid Event Pass or monthly plan.
 
 ## Product
 - [KoiCard homepage](https://koicard.app/landing): Product overview, feature list, and pricing
@@ -11,13 +11,14 @@ KoiCard lets you take a photo (or scan a QR code / vCard) of a business card and
 
 ## Pricing
 - Free: 10 scans per month, no credit card required
-- Event Pass: $5.99, unlimited scans for 4 days (aimed at multi-day conferences)
-- Monthly: $7.99/month, unlimited scans
+- Event Pass: $5.99, up to 300 scans over 4 days (aimed at multi-day conferences)
+- Monthly: $7.99/month, up to 500 scans per month
+- Mini Pass: $3.99, 150 extra scans valid for 30 days, for anyone who runs out (free or paid users)
 
 ## Key features
 - Camera or photo-upload business card scanning with AI-based field extraction
 - QR code and vCard/MECARD parsing for cards that already carry digital contact data
-- Automatic LinkedIn profile lookup for scanned contacts
+- Reads LinkedIn links printed on the card
 - Manual and follow-up-date-based urgency flags, with reminders
 - Color-coded contact organization and search
 - CSV export and optional Google Sheets sync via webhook

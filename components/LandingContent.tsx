@@ -53,8 +53,8 @@ export default function LandingContent() {
         <div style={{ display: "flex", gap: 8, marginBottom: 48, flexWrap: "wrap", justifyContent: "center" }}>
           {[
             { label: "Free", sub: `${FREE_SCANS_PER_MONTH} scans/month` },
-            { label: "Event Pass", sub: `${PASS_PRICE} · ${PRICING.pass.durationDays} days` },
-            { label: "Monthly", sub: `${MONTHLY_PRICE}/month` },
+            { label: "Event Pass", sub: `${PASS_PRICE} · ${PRICING.pass.durationDays} days · ${PRICING.pass.scanCap} scans` },
+            { label: "Monthly", sub: `${MONTHLY_PRICE}/month · ${PRICING.monthly.scanCap} scans` },
           ].map(p => (
             <div key={p.label} style={{ background: "#f7f5f2", borderRadius: 12, padding: "10px 16px", textAlign: "center" }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: "#1a1714" }}>{p.label}</div>

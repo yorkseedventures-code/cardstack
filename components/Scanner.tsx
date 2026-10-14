@@ -17,6 +17,7 @@ export default function Scanner({ onExtracted }: ScannerProps) {
   const [drag, setDrag] = useState(false);
   const [error, setError] = useState("");
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [upgradeMode, setUpgradeMode] = useState<"free" | "pass" | "monthly">("free");
 
   useEffect(() => {
     if (mode === "camera" && videoRef.current && streamRef.current) {
@@ -39,6 +40,10 @@ export default function Scanner({ onExtracted }: ScannerProps) {
       const data = await res.json();
       if (!res.ok) {
         if (data.limitReached) {
+          setUpgradeMode("free");
+          setShowUpgrade(true);
+        } else if (data.capReached) {
+          setUpgradeMode(data.capReached === "monthly" ? "monthly" : "pass");
           setShowUpgrade(true);
         } else {
           setError(data.error || "Something went wrong, try again");
@@ -145,7 +150,7 @@ export default function Scanner({ onExtracted }: ScannerProps) {
       </div>
       {error && <p className="text-red-500 text-xs text-center px-4">{error}</p>}
     </div>
-    {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} />}
+    {showUpgrade && <UpgradeModal mode={upgradeMode} onClose={() => setShowUpgrade(false)} />}
     </>
   );
 }

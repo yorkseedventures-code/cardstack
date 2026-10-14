@@ -11,6 +11,7 @@ import SettingsTab from "@/components/SettingsTab";
 import { Contact, ExtractedCard } from "@/lib/types";
 import { getColor } from "@/lib/colors";
 import { saveFileToDevice } from "@/lib/savePhoto";
+import { loadColorLabels } from "@/lib/colorLabels";
 
 type Tab = "scan" | "database" | "settings";
 type SortOption = "date" | "color" | "urgency" | "az" | "company";
@@ -200,9 +201,10 @@ export default function Home() {
     }
   };
 
-  const exportCSV = () => {
-    const headers = ["First name","Last name","Title","Company","Email","Phone","Phone 2","Website","LinkedIn","Where met","Follow-up","Notes","Added","Color"];
-    const rows = contacts.map(c => [c.first_name,c.last_name,c.title,c.company,c.email,c.phone,c.phone2,c.website,c.linkedin,c.event,c.follow_up,c.notes,c.added,c.color].map(v => `"${(v||"").replace(/"/g,'""')}"`));
+  const exportCSV = async () => {
+    const labels = await loadColorLabels(true).catch(() => ({} as Record<string, string>));
+    const headers = ["First name","Last name","Title","Company","Email","Phone","Phone 2","Website","LinkedIn","Where met","Follow-up","Notes","Added","Color","Color label"];
+    const rows = contacts.map(c => [c.first_name,c.last_name,c.title,c.company,c.email,c.phone,c.phone2,c.website,c.linkedin,c.event,c.follow_up,c.notes,c.added,c.color || "grey",labels[c.color || "grey"] || ""].map(v => `"${(v||"").replace(/"/g,'""')}"`));
     const csv = [headers,...rows].map(r => r.join(",")).join("\r\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     saveFileToDevice(blob, "koicard-contacts.csv");

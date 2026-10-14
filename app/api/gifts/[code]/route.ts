@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServerSupabase } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
 
-const EVENT_PASS_DAYS = 4;
+import { PRICING } from "@/lib/pricing";
+
+const EVENT_PASS_DAYS = PRICING.pass.durationDays;
 
 // Public: check whether a gift code is valid/unredeemed, without needing auth.
 // Used by the /gift/[code] claim page to show the right message before login.

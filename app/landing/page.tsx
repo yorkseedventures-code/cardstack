@@ -36,8 +36,9 @@ export default function LandingPage() {
     image: `${SITE_URL}${OG_IMAGE_PATH}`,
     offers: [
       { "@type": "Offer", name: "Free", price: "0", priceCurrency: "USD", description: `${FREE_SCANS_PER_MONTH} scans per month` },
-      { "@type": "Offer", name: "Event Pass", price: PRICING.pass.amountUsd.toFixed(2), priceCurrency: "USD", description: `Unlimited scans for ${PRICING.pass.durationDays} days` },
-      { "@type": "Offer", name: "Monthly", price: PRICING.monthly.amountUsd.toFixed(2), priceCurrency: "USD", description: "Unlimited scans, billed monthly" },
+      { "@type": "Offer", name: "Event Pass", price: PRICING.pass.amountUsd.toFixed(2), priceCurrency: "USD", description: `Up to ${PRICING.pass.scanCap} scans over ${PRICING.pass.durationDays} days` },
+      { "@type": "Offer", name: "Mini Pass", price: PRICING.mini.amountUsd.toFixed(2), priceCurrency: "USD", description: `${PRICING.mini.scans} extra scans, valid ${PRICING.mini.validDays} days` },
+      { "@type": "Offer", name: "Monthly", price: PRICING.monthly.amountUsd.toFixed(2), priceCurrency: "USD", description: `Up to ${PRICING.monthly.scanCap} scans a month, billed monthly` },
     ],
     publisher: { "@type": "Organization", name: "Yorkseed Venture Studio" },
   };

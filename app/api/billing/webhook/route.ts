@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getStripe, PASS_DURATION_MS } from "@/lib/stripe";
+import { MINI_DURATION_MS } from "@/lib/pricing";
 import { createAdminClient } from "@/lib/supabase-admin";
 
 // Stripe needs the raw body to verify the webhook signature, so this route
@@ -9,7 +10,7 @@ export const runtime = "nodejs";
 
 async function grantEntitlement(opts: {
   userId: string;
-  plan: "pass" | "monthly";
+  plan: "pass" | "monthly" | "mini";
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
   stripeSessionId: string | null;
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const userId = session.metadata?.user_id || session.client_reference_id;
-        const plan = session.metadata?.plan as "pass" | "monthly" | undefined;
+        const plan = session.metadata?.plan as "pass" | "monthly" | "mini" | undefined;
         if (!userId || !plan) break;
 
         if (plan === "pass") {
@@ -79,6 +80,16 @@ export async function POST(req: NextRequest) {
             stripeSubscriptionId: null,
             stripeSessionId: session.id,
             currentPeriodEnd: new Date(Date.now() + PASS_DURATION_MS),
+          });
+        } else if (plan === "mini") {
+          // Mini Pass: 150 extra scans, valid for 30 days from purchase.
+          await grantEntitlement({
+            userId,
+            plan: "mini",
+            stripeCustomerId: typeof session.customer === "string" ? session.customer : null,
+            stripeSubscriptionId: null,
+            stripeSessionId: session.id,
+            currentPeriodEnd: new Date(Date.now() + MINI_DURATION_MS),
           });
         } else if (plan === "monthly" && typeof session.subscription === "string") {
           // Pull the real period end from the subscription object rather than assuming 30 days.

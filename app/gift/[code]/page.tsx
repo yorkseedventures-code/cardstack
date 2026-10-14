@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { PRICING } from "@/lib/pricing";
 
 type Status = "checking" | "invalid" | "already_claimed" | "needs_login" | "redeeming" | "claimed" | "error";
 
@@ -67,7 +68,7 @@ export default function GiftClaimPage({ params }: { params: { code: string } }) 
           <>
             <div className="text-3xl mb-3">🎁</div>
             <h1 className="text-xl font-bold text-[#111] mb-2">You've got an Event Pass!</h1>
-            <p className="text-sm text-[#888] mb-5">Sign up or log in to claim your 4 days of unlimited scanning.</p>
+            <p className="text-sm text-[#888] mb-5">Sign up or log in to claim your {PRICING.pass.durationDays} days of unlimited scanning.</p>
             <button onClick={goToLogin} className="w-full py-3 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand/90 transition-all">
               Claim your pass
             </button>
@@ -82,7 +83,7 @@ export default function GiftClaimPage({ params }: { params: { code: string } }) 
             <h1 className="text-xl font-bold text-[#111] mb-2">Pass activated!</h1>
             <p className="text-sm text-[#888] mb-5">
               Unlimited scans until{" "}
-              {expiresAt ? new Date(expiresAt).toLocaleDateString(undefined, { month: "long", day: "numeric" }) : "in 4 days"}.
+              {expiresAt ? new Date(expiresAt).toLocaleDateString(undefined, { month: "long", day: "numeric" }) : `in ${PRICING.pass.durationDays} days`}.
             </p>
             <button onClick={() => router.push("/")} className="w-full py-3 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand/90 transition-all">
               Start scanning

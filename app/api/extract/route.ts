@@ -3,7 +3,8 @@ import OpenAI from "openai";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { rateLimit } from "@/lib/rate-limit";
-import { FREE_MONTHLY_SCAN_LIMIT, hasUnlimitedScans, hasActiveEntitlement, startOfCurrentMonthISO } from "@/lib/plan";
+import { SUPPORT_EMAIL } from "@/lib/pricing";
+import { FREE_MONTHLY_SCAN_LIMIT, hasUnlimitedScans, getScanAllowance } from "@/lib/plan";
 
 let client: OpenAI | null = null;
 function getClient(): OpenAI {
@@ -59,32 +60,54 @@ export async function POST(req: NextRequest) {
   const { allowed: userAllowed } = rateLimit(`user:scan:${user.id}`, 10, 60_000);
   if (!userAllowed) return NextResponse.json({ error: "Too many requests, slow down" }, { status: 429 });
 
-  if (!hasUnlimitedScans(user.email) && !(await hasActiveEntitlement(supabase, user.id))) {
+  if (!hasUnlimitedScans(user.email)) {
+    const { cap, windowStartISO, basePlan, hasMini } = await getScanAllowance(supabase, user.id);
+
     const { count, error: countError } = await supabase
       .from("scans")
       .select("id", { count: "exact", head: true })
       .eq("user_id", user.id)
-      .gte("created_at", startOfCurrentMonthISO());
+      .gte("created_at", windowStartISO);
 
     if (countError) return NextResponse.json({ error: countError.message }, { status: 500 });
 
-    if ((count ?? 0) >= FREE_MONTHLY_SCAN_LIMIT) {
-      return NextResponse.json(
-        { error: `You've hit your ${FREE_MONTHLY_SCAN_LIMIT} free scans this month. Upgrade to keep scanning.`, limitReached: true },
-        { status: 403 }
-      );
+    if ((count ?? 0) >= cap) {
+      if (basePlan) {
+        const what = basePlan === "monthly" ? "this month" : "with your Event Pass";
+        return NextResponse.json(
+          { error: `You've used all ${cap} scans included ${what}. Get a Mini Pass for more, or contact ${SUPPORT_EMAIL}.`, capReached: basePlan },
+          { status: 403 }
+        );
+      }
+      const msg = hasMini
+        ? `You've used all ${cap} scans, including your Mini Pass. Get another to keep scanning.`
+        : `You've hit your ${FREE_MONTHLY_SCAN_LIMIT} free scans this month. Upgrade to keep scanning.`;
+      return NextResponse.json({ error: msg, limitReached: true }, { status: 403 });
     }
   }
+
+  // Record the scan up front so a failure to save it can never give away free scans.
+  // If the extraction itself fails below, the record is removed again so nobody is charged a scan.
+  const { data: scanRow, error: scanError } = await supabase
+    .from("scans")
+    .insert({ user_id: user.id })
+    .select("id")
+    .single();
+  if (scanError || !scanRow) {
+    console.error("Could not record scan:", scanError);
+    return NextResponse.json({ error: "Could not record scan, please try again" }, { status: 500 });
+  }
+  const refundScan = async () => { await supabase.from("scans").delete().eq("id", scanRow.id); };
 
   try {
     const { base64, mediaType } = await req.json();
 
-    if (!base64 || !mediaType) return NextResponse.json({ error: "Missing image" }, { status: 400 });
+    if (!base64 || !mediaType) { await refundScan(); return NextResponse.json({ error: "Missing image" }, { status: 400 }); }
     if (!["image/jpeg", "image/png", "image/webp"].includes(mediaType)) {
-      return NextResponse.json({ error: "Invalid image type" }, { status: 400 });
+      { await refundScan(); return NextResponse.json({ error: "Invalid image type" }, { status: 400 }); }
     }
     if (base64.length > 10_000_000) {
-      return NextResponse.json({ error: "Image too large" }, { status: 400 });
+      { await refundScan(); return NextResponse.json({ error: "Image too large" }, { status: 400 }); }
     }
 
     const response = await getClient().chat.completions.create({
@@ -120,11 +143,10 @@ No markdown, no explanation, just the raw JSON object.` }
       data.linkedin = await findLinkedIn(fullName, data.company || "");
     }
 
-    await supabase.from("scans").insert({ user_id: user.id });
-
     return NextResponse.json(data);
   } catch (err) {
     console.error("Extraction error:", err);
+    await refundScan();
     return NextResponse.json({ error: "Extraction failed" }, { status: 500 });
   }
 }

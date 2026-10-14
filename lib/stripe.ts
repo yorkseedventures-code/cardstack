@@ -18,6 +18,7 @@ export { PASS_DURATION_MS } from "./pricing";
 export const PLAN_PRICE_ENV: Record<PlanId, string> = {
   pass: "STRIPE_PRICE_PASS",       // one-time Event Pass (see lib/pricing.ts)
   monthly: "STRIPE_PRICE_MONTHLY", // recurring monthly (see lib/pricing.ts)
+  mini: "STRIPE_PRICE_MINI",       // one-time Mini Pass: extra scans (see lib/pricing.ts)
 };
 
 export function getPriceId(plan: PlanId): string {

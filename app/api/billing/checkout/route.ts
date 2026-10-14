@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
   let plan: PlanId;
   try {
     const body = await req.json();
-    if (body.plan !== "pass" && body.plan !== "monthly") {
+    if (body.plan !== "pass" && body.plan !== "monthly" && body.plan !== "mini") {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }
     plan = body.plan;

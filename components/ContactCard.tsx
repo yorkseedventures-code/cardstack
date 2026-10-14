@@ -24,7 +24,10 @@ const EDIT_FIELDS: { key: keyof Contact; label: string; type?: string }[] = [
 
 const fieldInputStyle = { width: "100%", fontSize: 12, padding: "7px 9px", borderRadius: 8, border: "1px solid #e8e6e2", background: "#fff", color: "#1a1714", outline: "none", fontFamily: "inherit" } as const;
 
+import { useColorLabels } from "@/lib/colorLabels";
+
 export default function ContactCard({ contact, onDeleted, onColorChange, onEdited }: { contact: Contact; onDeleted: (id: string) => void; onColorChange: (id: string, color: string) => void; onEdited: (id: string, updates: Partial<Contact>) => Promise<boolean> }) {
+  const colorLabels = useColorLabels();
   const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -153,13 +156,14 @@ export default function ContactCard({ contact, onDeleted, onColorChange, onEdite
                 <div style={{ fontSize: 11, color: "#888", background: "#f0ede8", borderRadius: 8, padding: "8px 10px", marginBottom: 10, lineHeight: 1.5 }}>{contact.notes}</div>
               )}
               <div style={{ marginBottom: 10 }}>
-                <div style={{ fontSize: 8, color: "#b8b0a6", fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: 6 }}>Color</div>
+                <div style={{ fontSize: 8, color: "#b8b0a6", fontWeight: 700, textTransform: "uppercase" as const, letterSpacing: "0.06em", marginBottom: 6 }}>Color{colorLabels[contact.color || "grey"] ? ` · ${colorLabels[contact.color || "grey"]}` : ""}</div>
                 <div style={{ display: "flex", gap: 8 }}>
                   {CONTACT_COLORS.map(c => (
                     <button
                       key={c.id}
                       onClick={(e) => { e.stopPropagation(); onColorChange(contact.id, c.id); }}
-                      aria-label={c.label}
+                      aria-label={colorLabels[c.id] || c.label}
+                      title={colorLabels[c.id] || c.label}
                       style={{
                         width: 22, height: 22, borderRadius: "50%", background: c.strip,
                         border: (contact.color || "grey") === c.id ? "2.5px solid #1a1714" : "2.5px solid transparent",
