@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { FAQS } from "@/lib/faqs";
 import SignupCounter from "@/components/SignupCounter";
-import ScreenshotStrip from "@/components/ScreenshotStrip";
 import { FREE_SCANS_PER_MONTH, PASS_PRICE, MONTHLY_PRICE, MINI_PRICE, PRICING } from "@/lib/pricing";
 
 export default function LandingContent() {
@@ -12,7 +11,7 @@ export default function LandingContent() {
   return (
     <div style={{ minHeight: "100dvh", background: "#fff", display: "flex", flexDirection: "column", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
       {/* Nav */}
-      <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px", maxWidth: 480, margin: "0 auto", width: "100%" }}>
+      <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px", maxWidth: 480, margin: "0 auto", width: "100%" }} className="ld-nav">
         <div style={{ fontSize: 20, fontWeight: 900, color: "#1a1714", letterSpacing: -0.5 }}>
           koi<span style={{ color: "#DC2626" }}>card</span>
         </div>
@@ -22,7 +21,9 @@ export default function LandingContent() {
       </nav>
 
       {/* Hero */}
-      <main style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px 60px", textAlign: "center", maxWidth: 480, margin: "0 auto", width: "100%" }}>
+      <main className="ld-main" style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px 60px", textAlign: "center", maxWidth: 480, margin: "0 auto", width: "100%" }}>
+        <div className="ld-hero" style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+        <div className="ld-hero-text" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
 
         <h1 style={{ fontSize: 42, fontWeight: 900, color: "#1a1714", letterSpacing: -1.5, lineHeight: 1.1, marginBottom: 20 }}>
           Scan a card.<br />
@@ -51,7 +52,7 @@ export default function LandingContent() {
         <p style={{ fontSize: 11, color: "#c8c0b8", marginBottom: 48 }}>No credit card required · {FREE_SCANS_PER_MONTH} free scans/month</p>
 
         {/* Pricing pills */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 48, flexWrap: "wrap", justifyContent: "center" }}>
+        <div className="ld-pills">
           {[
             { label: "Free", sub: `${FREE_SCANS_PER_MONTH} scans/month` },
             { label: "Event Pass", sub: `${PASS_PRICE} · ${PRICING.pass.durationDays} days · ${PRICING.pass.scanCap} scans` },
@@ -65,10 +66,12 @@ export default function LandingContent() {
           ))}
         </div>
 
-        {/* See it in action */}
-        <div style={{ width: "100%", marginBottom: 48 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 900, color: "#1a1714", marginBottom: 14, textAlign: "center" }}>See how it works</h2>
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
+        </div>
+
+        {/* Demo video (beside the headline on desktop) */}
+        <div className="ld-hero-media" style={{ width: "100%", marginBottom: 48 }}>
+          <div className="ld-video-label">See it in 12 seconds</div>
+          <div style={{ display: "flex", justifyContent: "center" }}>
             <video
               src="/screens/demo.mp4"
               poster="/screens/demo-poster.jpg"
@@ -81,11 +84,12 @@ export default function LandingContent() {
               style={{ width: "100%", maxWidth: 260, height: "auto", borderRadius: 18, border: "1px solid #e8e4dc", background: "#f7f5f2" }}
             />
           </div>
-          <ScreenshotStrip width={170} />
+        </div>
         </div>
 
+
         {/* Features */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, width: "100%", marginBottom: 56 }}>
+        <div className="ld-features" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, width: "100%", marginBottom: 56 }}>
           {[
             { icon: "📷", label: "Camera scan" },
             { icon: "🤖", label: "AI extracts info" },
@@ -102,7 +106,7 @@ export default function LandingContent() {
         </div>
 
         {/* FAQ */}
-        <div style={{ width: "100%", textAlign: "left" }}>
+        <div className="ld-faq" style={{ width: "100%", textAlign: "left" }}>
           <h2 style={{ fontSize: 20, fontWeight: 900, color: "#1a1714", marginBottom: 16, textAlign: "center" }}>
             Frequently asked questions
           </h2>

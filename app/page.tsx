@@ -248,11 +248,32 @@ export default function Home() {
   );
 
   return (
-    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", maxWidth: 680, margin: "0 auto", background: "#fff" }}>
+    <div className="app-shell">
+      <aside className="app-sidebar">
+        <div className="side-logo">koi<span style={{ color: "#DC2626" }}>card</span></div>
+        {(["scan","database","settings"] as Tab[]).map(t => {
+          const label = { scan: "Scan a card", database: "Contacts", settings: "Settings" }[t];
+          const glyph = { scan: "📷", database: "📇", settings: "⚙️" }[t];
+          return (
+            <button key={t} className={`side-btn${tab === t ? " active" : ""}`}
+              onClick={() => { setTab(t); if (t === "scan") { setExtracted(null); setImageDataUrl(""); } }}>
+              <span aria-hidden="true">{glyph}</span>{label}
+            </button>
+          );
+        })}
+        <div className="side-foot">
+          {contacts.length} contact{contacts.length !== 1 ? "s" : ""}
+          {urgentCount > 0 ? ` · ${urgentCount} urgent` : ""}
+          <br />
+          <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a>
+        </div>
+      </aside>
+      <div className="app-content">
       <header className="desktop-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "24px 20px 16px", borderBottom: "0.5px solid #f0ede8" }}>
         <div>
-          <div style={{ fontSize: 26, fontWeight: 900, color: "#1a1714", letterSpacing: -1, lineHeight: 1 }}>koi<span style={{ color: "#DC2626" }}>card</span></div>
-          <div style={{ fontSize: 11, color: "#b8b0a6", marginTop: 2 }}>
+          <div className="header-logo" style={{ fontSize: 26, fontWeight: 900, color: "#1a1714", letterSpacing: -1, lineHeight: 1 }}>koi<span style={{ color: "#DC2626" }}>card</span></div>
+          <div className="header-title">{{ scan: "Scan a card", database: "Contacts", settings: "Settings" }[tab]}</div>
+          <div className="header-sub" style={{ fontSize: 11, color: "#b8b0a6", marginTop: 2 }}>
             {contacts.length} contact{contacts.length !== 1 ? "s" : ""}
             {urgentCount > 0 ? ` · ${urgentCount} urgent` : ""}
           </div>
@@ -317,7 +338,7 @@ export default function Home() {
               </div>
             ) : (
               <div>
-                <div>
+                <div className="contact-grid">
                   {paginated.map(c => <ContactCard key={c.id} contact={c} onDeleted={handleDeleted} onColorChange={handleColorChange} onEdited={handleEdited} />)}
                 </div>
                 {totalPages > 1 && (
@@ -357,6 +378,7 @@ export default function Home() {
       </nav>
 
       <AddToHomeScreen />
+      </div>
     </div>
   );
 }

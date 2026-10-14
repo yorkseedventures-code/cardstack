@@ -53,14 +53,26 @@ textarea.field-input { resize: none; min-height: 72px; }
 }
 
 .app-content {
-  display: block;
+  display: flex;
+  flex-direction: column;
   width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
   background: #fff;
   min-height: 100dvh;
 }
 
+.header-title { display: none; }
+.ld-pills { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; max-width: 340px; margin-bottom: 40px; }
+.ld-pills > div { background: #f7f5f2; border-radius: 12px; padding: 10px 8px; text-align: center; }
+.ld-video-label { font-size: 12px; font-weight: 700; color: #b8b0a6; text-align: center; margin-bottom: 10px; letter-spacing: .04em; text-transform: uppercase; }
+.side-logo, .side-foot { display: none; }
+.side-btn { display: none; }
+
 @media (min-width: 900px) {
   body { background: #f7f5f2; }
+  .side-logo, .side-foot { display: block; }
+  .side-btn { display: flex; }
 
   .app-shell {
     display: flex;
@@ -85,7 +97,8 @@ textarea.field-input { resize: none; min-height: 72px; }
 
   .app-content {
     flex: 1;
-    max-width: 700px;
+    max-width: 880px;
+    margin: 0;
     border-radius: 20px;
     border: 0.5px solid #ece9e4;
     min-height: calc(100vh - 64px);
@@ -95,6 +108,36 @@ textarea.field-input { resize: none; min-height: 72px; }
   }
 
   .mobile-nav { display: none !important; }
+  .header-logo, .header-sub { display: none; }
+  .header-title { display: block; font-size: 22px; font-weight: 800; color: #1a1714; letter-spacing: -0.5px; }
+
+  .side-logo { font-size: 28px; font-weight: 900; color: #1a1714; letter-spacing: -1px; line-height: 1; padding: 4px 12px 24px; }
+  .side-btn {
+    display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+    padding: 11px 14px; margin-bottom: 4px; border: none; border-radius: 12px; cursor: pointer;
+    background: transparent; color: #8a8278; font-size: 14px; font-weight: 600; font-family: inherit;
+    transition: background .15s, color .15s;
+  }
+  .side-btn:hover { background: #ece9e4; color: #1a1714; }
+  .side-btn.active { background: #1a1714; color: #fff; }
+  .side-foot { margin-top: auto; padding: 16px 14px 0; font-size: 11px; color: #b8b0a6; line-height: 1.8; }
+  .side-foot a { color: #b8b0a6; text-decoration: none; }
+  .side-foot a:hover { color: #1a1714; }
+
+  /* Contact list: two columns on wide screens */
+  .contact-grid { display: grid; grid-template-columns: 1fr; gap: 0 28px; }
+
+  /* Landing page */
+  .ld-nav { max-width: 1120px !important; }
+  .ld-main { max-width: 1120px !important; }
+  .ld-hero { display: grid !important; grid-template-columns: 1.1fr 0.9fr; gap: 56px; align-items: center; text-align: left !important; width: 100%; }
+  .ld-hero-text { align-items: flex-start !important; text-align: left !important; }
+  .ld-hero-text p, .ld-hero-text h1 { max-width: 520px !important; }
+  .ld-hero-text h1 { font-size: 64px !important; }
+  .ld-pills { grid-template-columns: repeat(4, 1fr); max-width: 620px; }
+  .ld-hero-media video { max-width: 320px !important; }
+  .ld-features { grid-template-columns: repeat(6, 1fr) !important; }
+  .ld-faq { max-width: 760px; margin: 0 auto; }
   .desktop-header { padding: 28px 32px 16px !important; }
   .desktop-main { padding: 24px 32px 40px !important; }
 }
