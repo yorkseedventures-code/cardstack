@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { FAQS } from "@/lib/faqs";
 import SignupCounter from "@/components/SignupCounter";
+import { FREE_SCANS_PER_MONTH, PASS_PRICE, MONTHLY_PRICE, PRICING } from "@/lib/pricing";
 
 export default function LandingContent() {
   const router = useRouter();
@@ -31,7 +32,7 @@ export default function LandingContent() {
           You'll spend $20 on drinks at the event.
         </p>
         <p style={{ fontSize: 18, color: "#DC2626", fontWeight: 700, lineHeight: 1.5, marginBottom: 24, maxWidth: 340 }}>
-          Spend $7.99 remembering who you met.
+          Spend {MONTHLY_PRICE} remembering who you met.
         </p>
 
         <p style={{ fontSize: 13, color: "#b8b0a6", lineHeight: 1.7, marginBottom: 32, maxWidth: 320 }}>
@@ -46,14 +47,14 @@ export default function LandingContent() {
         >
           Get started free
         </button>
-        <p style={{ fontSize: 11, color: "#c8c0b8", marginBottom: 48 }}>No credit card required · 20 free scans/month</p>
+        <p style={{ fontSize: 11, color: "#c8c0b8", marginBottom: 48 }}>No credit card required · {FREE_SCANS_PER_MONTH} free scans/month</p>
 
         {/* Pricing pills */}
         <div style={{ display: "flex", gap: 8, marginBottom: 48, flexWrap: "wrap", justifyContent: "center" }}>
           {[
-            { label: "Free", sub: "20 scans/month" },
-            { label: "Event Pass", sub: "$5.99 · 4 days" },
-            { label: "Monthly", sub: "$7.99/month" },
+            { label: "Free", sub: `${FREE_SCANS_PER_MONTH} scans/month` },
+            { label: "Event Pass", sub: `${PASS_PRICE} · ${PRICING.pass.durationDays} days` },
+            { label: "Monthly", sub: `${MONTHLY_PRICE}/month` },
           ].map(p => (
             <div key={p.label} style={{ background: "#f7f5f2", borderRadius: 12, padding: "10px 16px", textAlign: "center" }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: "#1a1714" }}>{p.label}</div>

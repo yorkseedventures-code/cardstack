@@ -22,22 +22,26 @@ function getIP(req: NextRequest) { return req.headers.get("x-forwarded-for")?.sp
 const LIST_FIELDS = "id, user_id, first_name, last_name, title, company, email, phone, phone2, website, linkedin, instagram, x_handle, address, event, follow_up, notes, added, color, urgent, created_at, card_image_path, image_migrated_at";
 
 export async function GET(req: NextRequest) {
-  const { allowed } = rateLimit(getIP(req), 60);
-  if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  const { allowed: ipAllowed } = rateLimit(`ip:contacts:${getIP(req)}`, 300);
+  if (!ipAllowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   const supabase = getSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { allowed: userAllowed } = rateLimit(`user:contacts1:${user.id}`, 60);
+  if (!userAllowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   const { data, error } = await supabase.from("contacts").select(LIST_FIELDS).eq("user_id", user.id).order("created_at", { ascending: false });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
 }
 
 export async function POST(req: NextRequest) {
-  const { allowed } = rateLimit(getIP(req), 30);
-  if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  const { allowed: ipAllowed } = rateLimit(`ip:contacts:${getIP(req)}`, 300);
+  if (!ipAllowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   const supabase = getSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { allowed: userAllowed } = rateLimit(`user:contacts2:${user.id}`, 30);
+  if (!userAllowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   const body = await req.json();
   const imageData = typeof body.card_image === "string" ? body.card_image : "";
   const contact = sanitizeContact(body);
@@ -72,11 +76,13 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  const { allowed } = rateLimit(getIP(req), 30);
-  if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  const { allowed: ipAllowed } = rateLimit(`ip:contacts:${getIP(req)}`, 300);
+  if (!ipAllowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   const supabase = getSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { allowed: userAllowed } = rateLimit(`user:contacts3:${user.id}`, 30);
+  if (!userAllowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   const body = await req.json();
   const { id, ...rest } = body;
   if (!id || typeof id !== "string") return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
@@ -110,11 +116,13 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const { allowed } = rateLimit(getIP(req), 30);
-  if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  const { allowed: ipAllowed } = rateLimit(`ip:contacts:${getIP(req)}`, 300);
+  if (!ipAllowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   const supabase = getSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { allowed: userAllowed } = rateLimit(`user:contacts4:${user.id}`, 30);
+  if (!userAllowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   const { id } = await req.json();
   if (!id || typeof id !== "string") return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
   const { data: existing } = await supabase.from("contacts").select("card_image_path").eq("id", id).eq("user_id", user.id).maybeSingle();

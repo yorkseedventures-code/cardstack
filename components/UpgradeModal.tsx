@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { FREE_SCANS_PER_MONTH, PASS_PRICE, MONTHLY_PRICE, PRICING } from "@/lib/pricing";
 
 export default function UpgradeModal({ onClose }: { onClose: () => void }) {
   const [loadingPlan, setLoadingPlan] = useState<"pass" | "monthly" | null>(null);
@@ -36,7 +37,7 @@ export default function UpgradeModal({ onClose }: { onClose: () => void }) {
       >
         <div style={{ fontSize: 18, fontWeight: 800, color: "#1a1714", marginBottom: 4 }}>You've hit your free scans</div>
         <div style={{ fontSize: 13, color: "#888", marginBottom: 20 }}>
-          You get 20 free scans a month. Upgrade to keep scanning without limits.
+          You get {FREE_SCANS_PER_MONTH} free scans a month. Upgrade to keep scanning without limits.
         </div>
 
         <button
@@ -47,7 +48,7 @@ export default function UpgradeModal({ onClose }: { onClose: () => void }) {
             background: "#1a1714", color: "#fff", cursor: "pointer", marginBottom: 10, opacity: loadingPlan && loadingPlan !== "monthly" ? 0.5 : 1,
           }}
         >
-          <div style={{ fontSize: 14, fontWeight: 700 }}>{loadingPlan === "monthly" ? "Redirecting..." : "$7.99 / month"}</div>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>{loadingPlan === "monthly" ? "Redirecting..." : `${MONTHLY_PRICE} / month`}</div>
           <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>Unlimited scans, cancel anytime</div>
         </button>
 
@@ -59,8 +60,8 @@ export default function UpgradeModal({ onClose }: { onClose: () => void }) {
             background: "#fff", color: "#1a1714", cursor: "pointer", opacity: loadingPlan && loadingPlan !== "pass" ? 0.5 : 1,
           }}
         >
-          <div style={{ fontSize: 14, fontWeight: 700 }}>{loadingPlan === "pass" ? "Redirecting..." : "$5.99 / Event Pass"}</div>
-          <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>Unlimited scans for 4 days, one-time</div>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>{loadingPlan === "pass" ? "Redirecting..." : `${PASS_PRICE} / Event Pass`}</div>
+          <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>Unlimited scans for {PRICING.pass.durationDays} days, one-time</div>
         </button>
 
         {error && <p style={{ color: "#dc2626", fontSize: 12, marginTop: 12, textAlign: "center" }}>{error}</p>}

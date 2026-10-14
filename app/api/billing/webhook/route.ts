@@ -16,7 +16,19 @@ async function grantEntitlement(opts: {
   currentPeriodEnd: Date;
 }) {
   const supabase = createAdminClient();
-  await supabase.from("entitlements").insert({
+
+  // Stripe retries webhooks, so the same checkout can arrive twice. Skip if we already
+  // granted an entitlement for this checkout session.
+  if (opts.stripeSessionId) {
+    const { data: existing } = await supabase
+      .from("entitlements")
+      .select("id")
+      .eq("stripe_session_id", opts.stripeSessionId)
+      .limit(1);
+    if (existing && existing.length > 0) return;
+  }
+
+  const { error } = await supabase.from("entitlements").insert({
     user_id: opts.userId,
     plan: opts.plan,
     status: "active",
@@ -25,6 +37,8 @@ async function grantEntitlement(opts: {
     stripe_session_id: opts.stripeSessionId,
     current_period_end: opts.currentPeriodEnd.toISOString(),
   });
+  // 23505 = unique violation: a concurrent retry already inserted this session, which is fine.
+  if (error && error.code !== "23505") throw error;
 }
 
 export async function POST(req: NextRequest) {

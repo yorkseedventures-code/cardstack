@@ -2,7 +2,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 // Free plan monthly scan limit, and emails that bypass it with unlimited scans.
 
-export const FREE_MONTHLY_SCAN_LIMIT = 20;
+import { FREE_SCANS_PER_MONTH } from "./pricing";
+
+export const FREE_MONTHLY_SCAN_LIMIT = FREE_SCANS_PER_MONTH;
 
 // Manual override list (e.g. team/testing accounts) — kept alongside real paid
 // entitlements below, not instead of them.

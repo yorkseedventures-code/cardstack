@@ -10,7 +10,7 @@ KoiCard lets you take a photo (or scan a QR code / vCard) of a business card and
 - [Terms & Conditions](https://koicard.app/terms): Terms of service
 
 ## Pricing
-- Free: 20 scans per month, no credit card required
+- Free: 10 scans per month, no credit card required
 - Event Pass: $5.99, unlimited scans for 4 days (aimed at multi-day conferences)
 - Monthly: $7.99/month, unlimited scans
 

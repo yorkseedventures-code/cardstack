@@ -13,11 +13,13 @@ function getSupabase() {
 function getIP(req: NextRequest) { return req.headers.get("x-forwarded-for")?.split(",")[0] || "unknown"; }
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const { allowed } = rateLimit(getIP(req), 60);
-  if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  const { allowed: ipAllowed } = rateLimit(`ip:image:${getIP(req)}`, 300);
+  if (!ipAllowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   const supabase = getSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { allowed: userAllowed } = rateLimit(`user:image1:${user.id}`, 60);
+  if (!userAllowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   const { data, error } = await supabase.from("contacts").select("card_image_path, card_image").eq("id", params.id).eq("user_id", user.id).single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   if (data?.card_image_path) {

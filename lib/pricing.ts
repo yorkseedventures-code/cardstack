@@ -5,7 +5,7 @@
 // Price objects behind STRIPE_PRICE_PASS and STRIPE_PRICE_MONTHLY. If you change an amount here,
 // create a new Price in Stripe, put its id in the env var, and update public/llms.txt by hand.
 
-export const FREE_SCANS_PER_MONTH = 1; // TEMPORARY FOR TESTING: set back to 20 before launch
+export const FREE_SCANS_PER_MONTH = 10;
 
 export const PRICING = {
   pass: {

@@ -11,11 +11,13 @@ export function getStripe(): Stripe {
   return stripe;
 }
 
-export type PlanId = "pass" | "monthly";
+export type { PlanId } from "./pricing";
+import type { PlanId } from "./pricing";
+export { PASS_DURATION_MS } from "./pricing";
 
 export const PLAN_PRICE_ENV: Record<PlanId, string> = {
-  pass: "STRIPE_PRICE_PASS",       // one-time $5.99 / Event Pass (4 days)
-  monthly: "STRIPE_PRICE_MONTHLY", // recurring $7.99/month
+  pass: "STRIPE_PRICE_PASS",       // one-time Event Pass (see lib/pricing.ts)
+  monthly: "STRIPE_PRICE_MONTHLY", // recurring monthly (see lib/pricing.ts)
 };
 
 export function getPriceId(plan: PlanId): string {
@@ -25,4 +27,3 @@ export function getPriceId(plan: PlanId): string {
   return priceId;
 }
 
-export const PASS_DURATION_MS = 4 * 24 * 60 * 60 * 1000; // 4 days

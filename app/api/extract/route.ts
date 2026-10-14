@@ -46,12 +46,18 @@ async function findLinkedIn(name: string, company: string): Promise<string> {
 }
 
 export async function POST(req: NextRequest) {
-  const { allowed } = rateLimit(getIP(req), 10, 60_000);
-  if (!allowed) return NextResponse.json({ error: "Too many requests, slow down" }, { status: 429 });
+  // Loose per-IP backstop against abuse. Many people can share one IP (conference Wi-Fi, offices),
+  // so the real limit below is per signed-in user.
+  const { allowed: ipAllowed } = rateLimit(`ip:scan:${getIP(req)}`, 300, 60_000);
+  if (!ipAllowed) return NextResponse.json({ error: "Too many requests, slow down" }, { status: 429 });
 
   const supabase = getSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Per-user limit: 10 scans a minute each, regardless of who else is on the same network.
+  const { allowed: userAllowed } = rateLimit(`user:scan:${user.id}`, 10, 60_000);
+  if (!userAllowed) return NextResponse.json({ error: "Too many requests, slow down" }, { status: 429 });
 
   if (!hasUnlimitedScans(user.email) && !(await hasActiveEntitlement(supabase, user.id))) {
     const { count, error: countError } = await supabase

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import LandingContent from "@/components/LandingContent";
 import { FAQS } from "@/lib/faqs";
+import { FREE_SCANS_PER_MONTH, PRICING } from "@/lib/pricing";
 import { SITE_URL, SITE_NAME, SITE_TAGLINE, SITE_DESCRIPTION, OG_IMAGE_PATH, OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -34,9 +35,9 @@ export default function LandingPage() {
     url: `${SITE_URL}/landing`,
     image: `${SITE_URL}${OG_IMAGE_PATH}`,
     offers: [
-      { "@type": "Offer", name: "Free", price: "0", priceCurrency: "USD", description: "20 scans per month" },
-      { "@type": "Offer", name: "Event Pass", price: "5.99", priceCurrency: "USD", description: "Unlimited scans for 4 days" },
-      { "@type": "Offer", name: "Monthly", price: "7.99", priceCurrency: "USD", description: "Unlimited scans, billed monthly" },
+      { "@type": "Offer", name: "Free", price: "0", priceCurrency: "USD", description: `${FREE_SCANS_PER_MONTH} scans per month` },
+      { "@type": "Offer", name: "Event Pass", price: PRICING.pass.amountUsd.toFixed(2), priceCurrency: "USD", description: `Unlimited scans for ${PRICING.pass.durationDays} days` },
+      { "@type": "Offer", name: "Monthly", price: PRICING.monthly.amountUsd.toFixed(2), priceCurrency: "USD", description: "Unlimited scans, billed monthly" },
     ],
     publisher: { "@type": "Organization", name: "Yorkseed Venture Studio" },
   };

@@ -1,3 +1,5 @@
+import { FREE_SCANS_PER_MONTH, PASS_PRICE, MONTHLY_PRICE, PRICING } from "./pricing";
+
 export const FAQS = [
   {
     q: "How does KoiCard scan a business card?",
@@ -25,7 +27,7 @@ export const FAQS = [
   },
   {
     q: "How much does KoiCard cost?",
-    a: "Free for 20 scans a month. An Event Pass ($5.99, valid 4 days) is perfect for conferences. A Monthly plan ($7.99/month) covers unlimited scanning year-round.",
+    a: `Free for ${FREE_SCANS_PER_MONTH} scans a month. An Event Pass (${PASS_PRICE}, valid ${PRICING.pass.durationDays} days) is perfect for conferences. A Monthly plan (${MONTHLY_PRICE}/month) covers unlimited scanning year-round.`,
   },
   {
     q: "Who is KoiCard for?",
