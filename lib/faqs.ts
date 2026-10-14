@@ -50,6 +50,10 @@ export const FAQS = [
     a: `Yes. In Settings, tap Gift an Event Pass and pay ${PASS_PRICE}. You'll get a private link to send to a friend, colleague or client. When they open it and sign up or log in, the Event Pass (${PRICING.pass.durationDays} days, up to ${PRICING.pass.scanCap} scans) is added to their account. Each link works once.`,
   },
   {
+    q: "I have an access code from an event. How do I use it?",
+    a: "Sign up or log in, open Settings, enter your code under Access code and tap Apply. (If you were sent a link, opening it does the same.) You get a set number of scans for a fixed period, for example 300 scans for two weeks, and Settings shows when it ends. If you start before the access period begins, you stay on the free plan until it does. When it ends you go back to the free plan, and you can buy a plan or Mini Pass anytime.",
+  },
+  {
     q: "Can I cancel my Monthly plan myself?",
     a: `Yes, anytime, no email needed. Go to Settings, tap Manage or cancel Monthly plan, and cancel in a couple of taps. You can also update your card and see invoices there. Cancelling stops future renewals and you keep access until the end of the period you've paid for. Event Passes and Mini Passes are one-time and never renew. Questions about a payment? Email ${SUPPORT_EMAIL}.`,
   },

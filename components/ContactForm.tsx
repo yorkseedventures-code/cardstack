@@ -40,7 +40,7 @@ export default function ContactForm({ extracted, fromQR, imageDataUrl, onSaved, 
 
       {fromQR ? (
         <div style={{ marginBottom: 10, padding: "9px 12px", borderRadius: 10, background: "#f0fdf4", border: "1px solid #bbf7d0", color: "#166534", fontSize: 12, fontWeight: 600, lineHeight: 1.4 }}>
-          ✓ Contact QR code detected. Filled in instantly, and this didn&apos;t use a scan.
+          ✓ QR code read. Filled in instantly, and this didn&apos;t use a scan.
         </div>
       ) : (
         <div style={{ marginBottom: 6, fontSize: 10, color: "#b8b0a6", fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>AI filled this in, edit anything</div>

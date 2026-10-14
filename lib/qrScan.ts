@@ -25,12 +25,48 @@ export function parseQRText(text: string): Partial<ExtractedCard> {
   return extractFromQRText(t);
 }
 
+/** How much of the last decoded picture its QR code covered (0 to 1). */
+let lastFrac = 0;
+/** Set by qrFieldsFromDataUrl: share of the whole photo covered by the QR it returned (0 if it came from a small crop). */
+export let lastQRShare = 0;
+function noteFrac(loc: { topLeftCorner: { x: number; y: number }; topRightCorner: { x: number; y: number }; bottomLeftCorner: { x: number; y: number }; bottomRightCorner: { x: number; y: number } }, w: number, h: number) {
+  const pts = [loc.topLeftCorner, loc.topRightCorner, loc.bottomLeftCorner, loc.bottomRightCorner];
+  const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
+  lastFrac = ((Math.max(...xs) - Math.min(...xs)) * (Math.max(...ys) - Math.min(...ys))) / (w * h);
+}
+
 function decodeCanvas(canvas: HTMLCanvasElement, inverted = true): string | null {
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   if (!ctx) return null;
   const { width, height } = canvas;
   const data = ctx.getImageData(0, 0, width, height);
-  return jsQR(data.data, width, height, { inversionAttempts: inverted ? "attemptBoth" : "dontInvert" })?.data || null;
+  const r = jsQR(data.data, width, height, { inversionAttempts: inverted ? "attemptBoth" : "dontInvert" });
+  if (r) noteFrac(r.location, width, height);
+  return r?.data || null;
+}
+
+/**
+ * Photos of a QR on a laptop or phone screen pick up moiré (the screen's pixel grid against the camera's).
+ * A light blur averages that pattern away; the plain decoder then reads the QR normally.
+ */
+function decodeSoft(canvas: HTMLCanvasElement): string | null {
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return null;
+  const { width: w, height: h } = canvas;
+  const img = ctx.getImageData(0, 0, w, h);
+  const px = img.data;
+  let gray: Float32Array = new Float32Array(w * h);
+  for (let i = 0; i < gray.length; i++) gray[i] = 0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2];
+  for (const r of [1, 2]) {
+    gray = boxBlur(boxBlur(gray, w, h, 1, true), w, h, 1, false);
+    if (r === 1 || r === 2) {
+      const out = new Uint8ClampedArray(w * h * 4);
+      for (let i = 0; i < gray.length; i++) { out[i * 4] = out[i * 4 + 1] = out[i * 4 + 2] = gray[i]; out[i * 4 + 3] = 255; }
+      const res = jsQR(out, w, h, { inversionAttempts: "attemptBoth" });
+      if (res) { noteFrac(res.location, w, h); return res.data; }
+    }
+  }
+  return null;
 }
 
 /**
@@ -58,8 +94,8 @@ function decodeStyled(canvas: HTMLCanvasElement): string | null {
         const v = blurred[i] < thr ? 0 : 255;
         out[i * 4] = out[i * 4 + 1] = out[i * 4 + 2] = v; out[i * 4 + 3] = 255;
       }
-      const text = jsQR(out, w, h, { inversionAttempts: "dontInvert" })?.data;
-      if (text) return text;
+      const r = jsQR(out, w, h, { inversionAttempts: "dontInvert" });
+      if (r) { noteFrac(r.location, w, h); return r.data; }
     }
   }
   return null;
@@ -114,9 +150,10 @@ export async function qrFieldsFromDataUrl(dataUrl: string): Promise<Partial<Extr
   const W = img.naturalWidth, H = img.naturalHeight;
   let fallback: Partial<ExtractedCard> = {};
 
-  const attempt = (c: HTMLCanvasElement, inverted: boolean, styled = false): Partial<ExtractedCard> | null => {
+  type Mode = "plain" | "soft" | "styled";
+  const attempt = (c: HTMLCanvasElement, inverted: boolean, mode: Mode): Partial<ExtractedCard> | null => {
     try {
-      const text = decodeCanvas(c, inverted) || (styled ? decodeStyled(c) : null);
+      const text = mode === "plain" ? decodeCanvas(c, inverted) : mode === "soft" ? decodeSoft(c) : decodeStyled(c);
       if (!text) return null;
       const f = parseQRText(text);
       return Object.keys(f).length ? f : null;
@@ -129,15 +166,14 @@ export async function qrFieldsFromDataUrl(dataUrl: string): Promise<Partial<Extr
     return null;
   };
 
-  // Pass 1: the whole picture (handles QR codes that fill a good part of the frame, also light-on-dark ones).
-  let hit = consider(attempt(drawScaled(img, 0, 0, W, H, Math.min(1400, Math.max(W, H))), true));
-  if (hit) return hit;
-  hit = consider(attempt(drawScaled(img, 0, 0, W, H, Math.min(900, Math.max(W, H))), true, true));
-  if (hit) return hit;
+  // Pass 1: the whole picture, plain decode (fast; handles QR codes that fill a good part of the frame).
+  lastQRShare = 0;
+  let hit = consider(attempt(drawScaled(img, 0, 0, W, H, Math.min(1400, Math.max(W, H))), true, "plain"));
+  if (hit) { lastQRShare = lastFrac; return hit; }
+  if (Object.keys(fallback).length) lastQRShare = lastFrac;
 
   // Pass 2: overlapping crops, centre first (cards and badges are usually framed in the middle), upscaled so a
-  // small QR gets enough pixels. Stops when the time budget is used up.
-  const start = performance.now();
+  // small QR gets enough pixels. Plain decode only, so it covers as many crops as possible within the time budget.
   const windows: { x: number; y: number; f: number; d: number }[] = [];
   for (const [f, offs] of [[0.6, [0, 0.4]], [0.4, [0, 0.3, 0.6]], [0.25, [0, 0.25, 0.5, 0.75]]] as [number, number[]][]) {
     const group: { x: number; y: number; f: number; d: number }[] = [];
@@ -148,12 +184,33 @@ export async function qrFieldsFromDataUrl(dataUrl: string): Promise<Partial<Extr
     group.sort((a, b) => a.d - b.d);
     windows.push(...group);
   }
+  const start = performance.now();
   for (const w of windows) {
     if (performance.now() - start > SWEEP_BUDGET_MS) break;
     await tick();
-    hit = consider(attempt(drawScaled(img, W * w.x, H * w.y, W * w.f, H * w.f, 700), false));
+    hit = consider(attempt(drawScaled(img, W * w.x, H * w.y, W * w.f, H * w.f, 700), false, "plain"));
     if (hit) return hit;
   }
+  if (Object.keys(fallback).length) return fallback;
+
+  // Pass 3: nothing found, so try the harder cases: photos of a screen (moiré) and styled QR codes (round dots, logos).
+  await tick();
+  hit = consider(attempt(drawScaled(img, 0, 0, W, H, Math.min(1400, Math.max(W, H))), true, "soft"));
+  if (hit) { lastQRShare = lastFrac; return hit; }
+  await tick();
+  hit = consider(attempt(drawScaled(img, 0, 0, W, H, Math.min(900, Math.max(W, H))), true, "styled"));
+  if (hit) { lastQRShare = lastFrac; return hit; }
+  if (Object.keys(fallback).length) { lastQRShare = lastFrac; return fallback; }
+
+  // Pass 4: the same blur trick on the crops, for a small QR in a photo of a screen.
+  const start2 = performance.now();
+  for (const w of windows.slice(0, 8)) {
+    if (performance.now() - start2 > SWEEP_BUDGET_MS) break;
+    await tick();
+    hit = consider(attempt(drawScaled(img, W * w.x, H * w.y, W * w.f, H * w.f, 700), false, "soft"));
+    if (hit) return hit;
+  }
+
   return fallback;
 }
 

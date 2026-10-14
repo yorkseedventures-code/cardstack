@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
 
     if ((count ?? 0) >= cap) {
       if (basePlan) {
-        const what = basePlan === "monthly" ? "this month" : "with your Event Pass";
+        const what = basePlan === "monthly" ? "this month" : basePlan === "delegate" ? "with your access code" : "with your Event Pass";
         return NextResponse.json(
           { error: `You've used all ${cap} scans included ${what}. Get a Mini Pass for more, or contact ${SUPPORT_EMAIL}.`, capReached: basePlan },
           { status: 403 }

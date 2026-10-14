@@ -56,7 +56,7 @@ export async function getActiveEntitlement(
     return null; // fail closed: treated as a free user if we can't verify
   }
   const row = data?.[0];
-  if (!row) return null;
+  if (!row) return await getAccessCodeWindow(supabase, userId);
 
   const isMonthly = row.plan === "monthly";
   const windowDays = isMonthly ? 30 : PRICING.pass.durationDays;
@@ -68,12 +68,32 @@ export async function getActiveEntitlement(
   };
 }
 
+// Access-code window (e.g. a delegation): everyone who redeemed the code shares the same fixed start/end and scan cap.
+// A paid plan, if they have one, takes priority over this.
+async function getAccessCodeWindow(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<{ plan: string; cap: number; windowStartISO: string } | null> {
+  const nowISO = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("access_redemptions")
+    .select("scan_cap, starts_at")
+    .eq("user_id", userId)
+    .lte("starts_at", nowISO)
+    .gt("ends_at", nowISO)
+    .order("ends_at", { ascending: false })
+    .limit(1);
+  if (error) { console.error("Access code lookup failed:", error); return null; }
+  const row = data?.[0];
+  return row ? { plan: "delegate", cap: row.scan_cap, windowStartISO: new Date(row.starts_at).toISOString() } : null;
+}
+
 // How many scans this person may make right now, and since when scans are counted.
 // = base allowance (free monthly limit, or Event Pass / Monthly cap) + MINI_SCANS for each active Mini Pass.
 export async function getScanAllowance(
   supabase: SupabaseClient,
   userId: string
-): Promise<{ cap: number; windowStartISO: string; basePlan: "pass" | "monthly" | null; hasMini: boolean }> {
+): Promise<{ cap: number; windowStartISO: string; basePlan: "pass" | "monthly" | "delegate" | null; hasMini: boolean }> {
   const base = await getActiveEntitlement(supabase, userId);
   const baseCap = base ? base.cap : FREE_MONTHLY_SCAN_LIMIT;
   const baseWindow = base ? base.windowStartISO : startOfCurrentMonthISO();
@@ -96,7 +116,7 @@ export async function getScanAllowance(
   return {
     cap: baseCap + list.length * MINI_SCANS,
     windowStartISO,
-    basePlan: base ? (base.plan as "pass" | "monthly") : null,
+    basePlan: base ? (base.plan as "pass" | "monthly" | "delegate") : null,
     hasMini: list.length > 0,
   };
 }

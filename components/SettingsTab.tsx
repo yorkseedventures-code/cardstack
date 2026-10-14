@@ -32,6 +32,31 @@ export default function SettingsTab({ user, onSignOut, onShare, shareCopied }: S
   const [billingError, setBillingError] = useState("");
 
   const [giftBusy, setGiftBusy] = useState(false);
+
+  // Access code (e.g. from a delegation or event)
+  const [accessCode, setAccessCode] = useState("");
+  const [accessBusy, setAccessBusy] = useState(false);
+  const [accessMsg, setAccessMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [access, setAccess] = useState<{ starts_at: string; ends_at: string; scans: number } | null>(null);
+  const fmtDay = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", timeZone: "UTC" });
+  useEffect(() => {
+    fetch("/api/access").then(r => r.ok ? r.json() : null).then(d => { if (d?.access) setAccess(d.access); }).catch(() => {});
+  }, []);
+  const redeemCode = async () => {
+    if (!accessCode.trim()) return;
+    setAccessBusy(true); setAccessMsg(null);
+    try {
+      const res = await fetch("/api/access", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: accessCode }) });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || "Couldn't use that code");
+      setAccess({ starts_at: d.starts_at, ends_at: d.expires_at, scans: d.scans });
+      setAccessCode("");
+      setAccessMsg({ ok: true, text: "Access activated!" });
+    } catch (e: any) {
+      setAccessMsg({ ok: false, text: e?.message || "Couldn't use that code" });
+    }
+    setAccessBusy(false);
+  };
   const buyGift = async () => {
     setBillingError("");
     setGiftBusy(true);
@@ -116,6 +141,32 @@ export default function SettingsTab({ user, onSignOut, onShare, shareCopied }: S
         <button onClick={onSignOut} style={{ width: "100%", padding: "11px 0", borderRadius: 30, background: "#fff", border: "0.5px solid #e0dbd4", fontSize: 13, color: "#666", fontWeight: 600, cursor: "pointer" }}>
           Sign out
         </button>
+      </>)}
+
+      {/* Access code */}
+      {card(<>
+        {sectionTitle("Access code", "Got a code from an event or delegation? Enter it here to unlock your scans.")}
+        {access && (
+          <div style={{ fontSize: 12, color: "#2f7d4f", background: "#eef8f1", borderRadius: 8, padding: "8px 10px", marginBottom: 10, lineHeight: 1.5 }}>
+            {new Date(access.starts_at).getTime() > Date.now()
+              ? `Access starts ${fmtDay(access.starts_at)}: ${access.scans} scans until ${fmtDay(new Date(new Date(access.ends_at).getTime() - 1).toISOString())}.`
+              : `Access active: ${access.scans} scans until ${fmtDay(new Date(new Date(access.ends_at).getTime() - 1).toISOString())}.`}
+          </div>
+        )}
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            value={accessCode}
+            onChange={e => setAccessCode(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") redeemCode(); }}
+            placeholder="Enter code"
+            autoCapitalize="characters"
+            style={{ flex: 1, minWidth: 0, background: "#fff", border: "1px solid #e0dbd4", borderRadius: 8, padding: "9px 10px", fontSize: 13, color: "#1a1714", outline: "none", fontFamily: "inherit", textTransform: "uppercase" }}
+          />
+          <button onClick={redeemCode} disabled={accessBusy || !accessCode.trim()} style={{ padding: "9px 16px", borderRadius: 30, background: "#1a1714", border: "none", fontSize: 13, color: "#fff", fontWeight: 600, cursor: "pointer", opacity: accessBusy || !accessCode.trim() ? 0.5 : 1 }}>
+            {accessBusy ? "..." : "Apply"}
+          </button>
+        </div>
+        {accessMsg && <p style={{ color: accessMsg.ok ? "#2f7d4f" : "#dc2626", fontSize: 12, marginTop: 8, textAlign: "center" }}>{accessMsg.text}</p>}
       </>)}
 
       {/* Color labels */}

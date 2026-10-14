@@ -3,7 +3,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { ExtractedCard } from "@/lib/types";
 import UpgradeModal from "@/components/UpgradeModal";
-import { EMPTY_CARD, isContactQR, qrFieldsFromDataUrl, qrFieldsFromVideo } from "@/lib/qrScan";
+import { EMPTY_CARD, isContactQR, qrFieldsFromDataUrl, qrFieldsFromVideo, lastQRShare } from "@/lib/qrScan";
 
 interface ScannerProps {
   onExtracted: (data: ExtractedCard, imageDataUrl: string, fromQR?: boolean) => void;
@@ -36,6 +36,12 @@ export default function Scanner({ onExtracted }: ScannerProps) {
       // 1) Contact QR codes (vCard / MECARD) carry everything: fill the form instantly, no AI call, no scan used.
       const qr = await qrFieldsFromDataUrl(dataUrl);
       if (isContactQR(qr)) {
+        onExtracted({ ...EMPTY_CARD, ...qr }, dataUrl, true);
+        return;
+      }
+      // A link-only QR (LinkedIn, Instagram, website...) that fills a big part of the picture is the whole subject:
+      // there is no card to read, so skip the AI and don't use a scan.
+      if (Object.keys(qr).length && lastQRShare > 0.12) {
         onExtracted({ ...EMPTY_CARD, ...qr }, dataUrl, true);
         return;
       }
