@@ -26,6 +26,22 @@ export default function SettingsTab({ user, onSignOut, onShare, shareCopied }: S
   const [labels, setLabels] = useState<Record<string, string>>(DEFAULT_LABELS);
   const [labelsSaved, setLabelsSaved] = useState(false);
   const [labelsError, setLabelsError] = useState("");
+  const [billingBusy, setBillingBusy] = useState(false);
+  const [billingError, setBillingError] = useState("");
+
+  const openBilling = async () => {
+    setBillingError("");
+    setBillingBusy(true);
+    try {
+      const res = await fetch("/api/billing/portal", { method: "POST" });
+      const d = await res.json();
+      if (!res.ok || !d.url) throw new Error(d.error || "Couldn't open billing");
+      window.location.href = d.url;
+    } catch (e: any) {
+      setBillingError(e?.message || "Couldn't open billing");
+      setBillingBusy(false);
+    }
+  };
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [openTip, setOpenTip] = useState<number | null>(null);
 
@@ -73,6 +89,10 @@ export default function SettingsTab({ user, onSignOut, onShare, shareCopied }: S
       {card(<>
         {sectionTitle("Account")}
         <div style={{ fontSize: 12, color: "#b8b0a6", marginBottom: 14 }}>{user?.email}</div>
+        <button onClick={openBilling} disabled={billingBusy} style={{ width: "100%", padding: "11px 0", borderRadius: 30, background: "#fff", border: "0.5px solid #e0dbd4", fontSize: 13, color: "#666", fontWeight: 600, cursor: "pointer", marginBottom: 8 }}>
+          {billingBusy ? "Opening..." : "Manage or cancel Monthly plan"}
+        </button>
+        {billingError && <p style={{ color: "#dc2626", fontSize: 12, margin: "0 0 8px", textAlign: "center" }}>{billingError}</p>}
         <button onClick={onSignOut} style={{ width: "100%", padding: "11px 0", borderRadius: 30, background: "#fff", border: "0.5px solid #e0dbd4", fontSize: 13, color: "#666", fontWeight: 600, cursor: "pointer" }}>
           Sign out
         </button>

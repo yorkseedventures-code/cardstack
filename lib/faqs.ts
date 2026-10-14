@@ -39,7 +39,7 @@ export const FAQS = [
   },
   {
     q: "How do I cancel or get help with a payment?",
-    a: `Email ${SUPPORT_EMAIL} and we'll cancel your Monthly plan or sort out a payment problem. Cancelling stops future renewals; you keep access until the end of the period you've paid for.`,
+    a: `Yes, on your own. Go to Settings, tap Manage or cancel Monthly plan, and cancel in a couple of taps. You can also update your card and see invoices there. Cancelling stops future renewals and you keep access until the end of the period you've paid for. For anything else, email ${SUPPORT_EMAIL}.`,
   },
   {
     q: "Who is KoiCard for?",

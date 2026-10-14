@@ -91,7 +91,7 @@ export default function TermsContent() {
               6. Cancellations and refunds
             </h2>
             <p>
-              {`You can cancel Monthly at any time by emailing ${SUPPORT_EMAIL}; cancelling stops future renewals and you keep access until the end of the period you've paid for. Event Passes and Mini Passes are one-time purchases that don't renew. Because scans use paid AI processing, purchases are generally non-refundable once used, but if something went wrong with a payment or the service, email ${SUPPORT_EMAIL} and we'll make it right.`}
+              {`You can cancel Monthly at any time yourself in Settings (Manage or cancel Monthly plan), or by emailing ${SUPPORT_EMAIL}; cancelling stops future renewals and you keep access until the end of the period you've paid for. Event Passes and Mini Passes are one-time purchases that don't renew. Because scans use paid AI processing, purchases are generally non-refundable once used, but if something went wrong with a payment or the service, email ${SUPPORT_EMAIL} and we'll make it right.`}
             </p>
           </section>
 
