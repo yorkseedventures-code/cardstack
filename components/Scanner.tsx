@@ -3,9 +3,10 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { ExtractedCard } from "@/lib/types";
 import UpgradeModal from "@/components/UpgradeModal";
+import { EMPTY_CARD, isContactQR, qrFieldsFromDataUrl, qrFieldsFromVideo } from "@/lib/qrScan";
 
 interface ScannerProps {
-  onExtracted: (data: ExtractedCard, imageDataUrl: string) => void;
+  onExtracted: (data: ExtractedCard, imageDataUrl: string, fromQR?: boolean) => void;
 }
 
 export default function Scanner({ onExtracted }: ScannerProps) {
@@ -26,10 +27,19 @@ export default function Scanner({ onExtracted }: ScannerProps) {
     }
   }, [mode]);
 
+  const autoCaptured = useRef(false);
+
   const processImage = useCallback(async (dataUrl: string) => {
     setMode("processing");
     setError("");
     try {
+      // 1) Contact QR codes (vCard / MECARD) carry everything: fill the form instantly, no AI call, no scan used.
+      const qr = await qrFieldsFromDataUrl(dataUrl);
+      if (isContactQR(qr)) {
+        onExtracted({ ...EMPTY_CARD, ...qr }, dataUrl, true);
+        return;
+      }
+      // 2) Otherwise read the card with AI as usual.
       const base64 = dataUrl.split(",")[1];
       const mediaType = dataUrl.split(";")[0].split(":")[1];
       const res = await fetch("/api/extract", {
@@ -51,7 +61,12 @@ export default function Scanner({ onExtracted }: ScannerProps) {
         setMode("idle");
         return;
       }
-      onExtracted(data, dataUrl);
+      // A website / LinkedIn QR on the card fills those fields if the AI didn't find them in the text.
+      const merged = { ...data };
+      for (const k of ["linkedin", "website", "email", "phone"] as const) {
+        if (!merged[k] && qr[k]) merged[k] = qr[k] as string;
+      }
+      onExtracted(merged, dataUrl);
     } catch {
       setError("Something went wrong, try again");
     } finally { setMode("idle"); }
@@ -93,6 +108,19 @@ export default function Scanner({ onExtracted }: ScannerProps) {
     setMode("idle");
   }, []);
 
+  // While the camera is open, look for a contact QR code in the live picture and capture it automatically.
+  useEffect(() => {
+    if (mode !== "camera") return;
+    autoCaptured.current = false;
+    const scratch = document.createElement("canvas");
+    const timer = setInterval(() => {
+      if (autoCaptured.current || !videoRef.current) return;
+      const found = qrFieldsFromVideo(videoRef.current, scratch);
+      if (isContactQR(found)) { autoCaptured.current = true; capturePhoto(); }
+    }, 350);
+    return () => clearInterval(timer);
+  }, [mode, capturePhoto]);
+
   if (mode === "camera") return (
     <div style={{ position:"fixed",inset:0,zIndex:50,background:"#000" }}>
       <video ref={videoRef} style={{ width:"100%",height:"100%",objectFit:"cover" }} autoPlay playsInline muted />
@@ -106,7 +134,7 @@ export default function Scanner({ onExtracted }: ScannerProps) {
           <div style={{ position:"absolute",bottom:0,right:0,width:28,height:28,borderBottom:"2px solid #DC2626",borderRight:"2px solid #DC2626",borderRadius:"0 0 12px 0" }} />
         </div>
       </div>
-      <p style={{ position:"absolute",top:"18%",left:0,right:0,textAlign:"center",color:"rgba(255,255,255,0.5)",fontSize:13 }}>Position card inside the frame</p>
+      <p style={{ position:"absolute",top:"18%",left:0,right:0,textAlign:"center",color:"rgba(255,255,255,0.5)",fontSize:13 }}>Position card inside the frame<br />QR codes are read automatically</p>
       <div style={{ position:"absolute",bottom:0,left:0,right:0,paddingBottom:48,paddingTop:24,display:"flex",justifyContent:"center",alignItems:"center",gap:48,background:"linear-gradient(transparent,rgba(0,0,0,0.6))" }}>
         <button onClick={stopCamera} style={{ width:48,height:48,borderRadius:"50%",background:"rgba(255,255,255,0.15)",border:"1.5px solid rgba(255,255,255,0.3)",color:"#fff",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center" }}>✕</button>
         <button onClick={capturePhoto} style={{ width:72,height:72,borderRadius:"50%",background:"#DC2626",border:"4px solid rgba(255,255,255,0.3)",display:"flex",alignItems:"center",justifyContent:"center" }}>
@@ -142,7 +170,7 @@ export default function Scanner({ onExtracted }: ScannerProps) {
       <div className="w-14 h-14 rounded-2xl bg-[#f5f4f2] border border-[#e8e6e2] flex items-center justify-center text-2xl">🪪</div>
       <div className="text-center">
         <p className="text-[#555] text-sm font-medium mb-1">Drop a business card photo</p>
-        <p className="text-[#bbb] text-xs">or tap to browse</p>
+        <p className="text-[#bbb] text-xs">or tap to browse. Works with QR codes too</p>
       </div>
       <div className="flex gap-3">
         <button className="px-4 py-2 rounded-xl bg-white border border-[#ddd] text-[#888] text-xs font-medium" onClick={(e) => { e.stopPropagation(); fileRef.current?.click(); }}>Upload photo</button>

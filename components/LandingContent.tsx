@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { FAQS } from "@/lib/faqs";
 import SignupCounter from "@/components/SignupCounter";
+import DemoCarousel from "@/components/DemoCarousel";
 import { FREE_SCANS_PER_MONTH, PASS_PRICE, MONTHLY_PRICE, MINI_PRICE, PRICING } from "@/lib/pricing";
 
 export default function LandingContent() {
@@ -70,23 +71,9 @@ export default function LandingContent() {
 
         {/* Demo video (beside the headline on desktop) */}
         <div className="ld-hero-media" style={{ width: "100%", marginBottom: 48 }}>
-          <div className="ld-video-label">See it in 12 seconds</div>
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <video
-              src="/screens/demo.mp4"
-              poster="/screens/demo-poster.jpg"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              aria-label="KoiCard demo: scan a card, review the details and save the contact"
-              style={{ width: "100%", maxWidth: 260, height: "auto", borderRadius: 18, border: "1px solid #e8e4dc", background: "#f7f5f2" }}
-            />
-          </div>
+          <DemoCarousel />
         </div>
         </div>
-
 
         {/* Features */}
         <div className="ld-features" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, width: "100%", marginBottom: 56 }}>

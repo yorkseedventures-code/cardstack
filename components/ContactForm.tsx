@@ -5,13 +5,14 @@ import { Contact, ExtractedCard } from "@/lib/types";
 import { CONTACT_COLORS } from "@/lib/colors";
 
 interface ContactFormProps {
+  fromQR?: boolean;
   extracted: ExtractedCard;
   imageDataUrl: string;
   onSaved: (contact: Omit<Contact, "id" | "user_id" | "created_at">) => void;
   onReset: () => void;
 }
 
-export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset }: ContactFormProps) {
+export default function ContactForm({ extracted, fromQR, imageDataUrl, onSaved, onReset }: ContactFormProps) {
   const [form, setForm] = useState({ ...extracted, event: "", follow_up: "", notes: "", color: "grey", instagram: "", x_handle: "", address: "" });
   const [saving, setSaving] = useState(false);
 
@@ -37,7 +38,13 @@ export default function ContactForm({ extracted, imageDataUrl, onSaved, onReset 
         <img src={imageDataUrl} alt="Card" style={{ width: "100%", maxHeight: 120, objectFit: "contain", borderRadius: 12, background: "#f7f5f2", marginBottom: 16 }} />
       )}
 
-      <div style={{ marginBottom: 6, fontSize: 10, color: "#b8b0a6", fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>AI filled this in, edit anything</div>
+      {fromQR ? (
+        <div style={{ marginBottom: 10, padding: "9px 12px", borderRadius: 10, background: "#f0fdf4", border: "1px solid #bbf7d0", color: "#166534", fontSize: 12, fontWeight: 600, lineHeight: 1.4 }}>
+          ✓ Contact QR code detected. Filled in instantly, and this didn&apos;t use a scan.
+        </div>
+      ) : (
+        <div style={{ marginBottom: 6, fontSize: 10, color: "#b8b0a6", fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>AI filled this in, edit anything</div>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
         <div><Label>First name</Label><input className="field-input" value={form.first_name} onChange={set("first_name")} placeholder="" /></div>

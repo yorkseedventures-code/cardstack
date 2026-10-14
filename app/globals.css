@@ -63,6 +63,22 @@ textarea.field-input { resize: none; min-height: 72px; }
 }
 
 .header-title { display: none; }
+
+/* Showcase carousel */
+.demo-carousel { position: relative; width: 100%; min-width: 0; }
+.ld-hero > * { min-width: 0; }
+.demo-track { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px calc(50% - 125px) 8px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.demo-track::-webkit-scrollbar { display: none; }
+.demo-slide { flex: 0 0 250px; margin: 0; scroll-snap-align: center; }
+.demo-frame { aspect-ratio: 9 / 18; border-radius: 22px; overflow: hidden; border: 1px solid #e8e4dc; background: #f7f5f2; box-shadow: 0 8px 28px rgba(26,23,20,.08); }
+.demo-frame img, .demo-frame video { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+.demo-slide figcaption { text-align: center; margin-top: 10px; font-size: 12px; color: #b8b0a6; line-height: 1.4; }
+.demo-slide figcaption strong { display: block; color: #1a1714; font-size: 13px; }
+.demo-arrow { display: none; }
+.demo-dots { display: flex; justify-content: center; gap: 7px; margin-top: 12px; }
+.demo-dots button { width: 7px; height: 7px; border-radius: 50%; border: none; padding: 0; background: #e0dbd4; cursor: pointer; }
+.demo-dots button.on { background: #1a1714; width: 20px; border-radius: 4px; }
+input[type="date"].field-input { min-width: 0; max-width: 100%; display: block; min-height: 42px; box-sizing: border-box; }
 .ld-pills { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; max-width: 340px; margin-bottom: 40px; }
 .ld-pills > div { background: #f7f5f2; border-radius: 12px; padding: 10px 8px; text-align: center; }
 .ld-video-label { font-size: 12px; font-weight: 700; color: #b8b0a6; text-align: center; margin-bottom: 10px; letter-spacing: .04em; text-transform: uppercase; }
@@ -135,7 +151,10 @@ textarea.field-input { resize: none; min-height: 72px; }
   .ld-hero-text p, .ld-hero-text h1 { max-width: 520px !important; }
   .ld-hero-text h1 { font-size: 64px !important; }
   .ld-pills { grid-template-columns: repeat(4, 1fr); max-width: 620px; }
-  .ld-hero-media video { max-width: 320px !important; }
+  .demo-track { padding: 6px calc(50% - 125px) 8px; }
+  .demo-arrow { display: flex; align-items: center; justify-content: center; position: absolute; top: 40%; width: 38px; height: 38px; border-radius: 50%; border: 1px solid #e0dbd4; background: #fff; color: #1a1714; font-size: 22px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+  .demo-arrow:disabled { opacity: .3; cursor: default; }
+  .demo-prev { left: 0; } .demo-next { right: 0; }
   .ld-features { grid-template-columns: repeat(6, 1fr) !important; }
   .ld-faq { max-width: 760px; margin: 0 auto; }
   .desktop-header { padding: 28px 32px 16px !important; }

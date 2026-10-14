@@ -6,6 +6,10 @@ export const FAQS = [
     a: "Take a photo with your camera or upload one. AI reads the card and fills in name, title, company, email, phone, website, LinkedIn, Instagram, X, and address automatically. You can edit anything before saving.",
   },
   {
+    q: "Does KoiCard read QR codes?",
+    a: "Yes. If a card, badge or phone screen shows a contact QR code (a vCard), point the camera at it or upload a photo and KoiCard fills in the whole contact instantly, for free, without using a scan. If the QR just links to a website or LinkedIn profile, KoiCard adds that link to the contact and reads the rest of the card as usual.",
+  },
+  {
     q: "What fields does KoiCard extract?",
     a: "Name, job title, company, email, phone (including a second number), website, LinkedIn, Instagram, X (Twitter), and physical address. After scanning, you can also add where you met, a follow-up date, notes, and a color tag.",
   },

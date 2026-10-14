@@ -19,6 +19,7 @@ KoiCard lets you take a photo (or scan a QR code / vCard) of a business card and
 - Camera or photo-upload business card scanning with AI-based field extraction
 - QR code and vCard/MECARD parsing for cards that already carry digital contact data
 - Reads LinkedIn links printed on the card
+- Reads QR codes: contact QR codes (vCard/MECARD) fill the whole contact instantly without using a scan; website or LinkedIn QR codes add the link
 - Manual and follow-up-date-based urgency flags, with reminders
 - Color-coded contact organization and search
 - CSV export and optional Google Sheets sync via webhook

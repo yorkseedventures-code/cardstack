@@ -97,8 +97,9 @@ export default function Home() {
     }
   };
 
-  const handleExtracted = useCallback((data: ExtractedCard, imgUrl: string) => {
-    setExtracted(data); setImageDataUrl(imgUrl);
+  const [fromQR, setFromQR] = useState(false);
+  const handleExtracted = useCallback((data: ExtractedCard, imgUrl: string, qr?: boolean) => {
+    setExtracted(data); setImageDataUrl(imgUrl); setFromQR(!!qr);
   }, []);
 
   const handleSaved = useCallback(async (contact: Omit<Contact, "id" | "user_id" | "created_at">) => {
@@ -294,7 +295,7 @@ export default function Home() {
         )}
         {tab === "scan" && (
           !extracted ? <Scanner onExtracted={handleExtracted} /> :
-          <ContactForm extracted={extracted} imageDataUrl={imageDataUrl} onSaved={handleSaved} onReset={() => { setExtracted(null); setImageDataUrl(""); }} />
+          <ContactForm extracted={extracted} fromQR={fromQR} imageDataUrl={imageDataUrl} onSaved={handleSaved} onReset={() => { setExtracted(null); setImageDataUrl(""); }} />
         )}
 
         {tab === "database" && (
