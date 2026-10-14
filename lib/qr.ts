@@ -61,7 +61,7 @@ export function parseVCard(text: string): Partial<ExtractedCard> {
     } else if (key.startsWith("TEL")) {
       phones.push(value);
     } else if (key.startsWith("URL")) {
-      if (value.includes("linkedin.com")) out.linkedin = value;
+      if (/linkedin\.com|lnkd\.in/i.test(value)) out.linkedin = cleanLinkedIn(value);
       else if (!out.website) out.website = value;
     }
   }
@@ -72,6 +72,17 @@ export function parseVCard(text: string): Partial<ExtractedCard> {
   return out;
 }
 
+/** LinkedIn's own QR codes carry tracking parameters (?lipi=, utm_*). Keep just the profile link; lnkd.in short links stay as they are. */
+export function cleanLinkedIn(url: string): string {
+  try {
+    const u = new URL(url);
+    if (/(^|\.)lnkd\.in$/i.test(u.hostname)) return u.origin + u.pathname;
+    const m = u.pathname.match(/^\/(in|pub|company)\/[^/]+/i);
+    if (m) return "https://www.linkedin.com" + m[0];
+    return url;
+  } catch { return url; }
+}
+
 /** Classify raw QR text and pull out whatever structured contact fields we can, with no AI involved. */
 export function extractFromQRText(text: string): Partial<ExtractedCard> {
   const trimmed = text.trim();
@@ -79,7 +90,7 @@ export function extractFromQRText(text: string): Partial<ExtractedCard> {
     return parseVCard(trimmed);
   }
   if (/^https?:\/\//i.test(trimmed)) {
-    if (trimmed.includes("linkedin.com")) return { linkedin: trimmed };
+    if (/^https?:\/\/(?:[a-z0-9-]+\.)*(?:linkedin\.com|lnkd\.in)(?:[\/?#]|$)/i.test(trimmed)) return { linkedin: cleanLinkedIn(trimmed) };
     return { website: trimmed };
   }
   // MECARD format (common on Japanese/some Android-generated business card QRs): MECARD:N:Doe,John;TEL:123;EMAIL:a@b.com;;

@@ -55,6 +55,10 @@ export default function Scanner({ onExtracted }: ScannerProps) {
         } else if (data.capReached) {
           setUpgradeMode(data.capReached === "monthly" ? "monthly" : "pass");
           setShowUpgrade(true);
+        } else if (Object.keys(qr).length) {
+          // The AI read failed, but the QR code still gave us a link / email / phone: use that instead of an error.
+          onExtracted({ ...EMPTY_CARD, ...qr }, dataUrl);
+          return;
         } else {
           setError(data.error || "Something went wrong, try again");
         }
@@ -64,7 +68,9 @@ export default function Scanner({ onExtracted }: ScannerProps) {
       // A website / LinkedIn QR on the card fills those fields if the AI didn't find them in the text.
       const merged = { ...data };
       for (const k of ["linkedin", "website", "email", "phone", "instagram", "x_handle"] as const) {
-        if (!merged[k] && qr[k]) merged[k] = qr[k] as string;
+        // The QR code is exact, so it wins for social links; for the rest it only fills gaps.
+        const exact = k === "linkedin" || k === "instagram" || k === "x_handle";
+        if (qr[k] && (exact || !merged[k])) merged[k] = qr[k] as string;
       }
       onExtracted(merged, dataUrl);
     } catch {

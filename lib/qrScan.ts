@@ -33,6 +33,53 @@ function decodeCanvas(canvas: HTMLCanvasElement, inverted = true): string | null
   return jsQR(data.data, width, height, { inversionAttempts: inverted ? "attemptBoth" : "dontInvert" })?.data || null;
 }
 
+/**
+ * Styled QR codes (LinkedIn's own blue QR with round dots and a logo, branded QR codes) fail a plain decode because the
+ * dots don't touch. Blurring the picture a little and then forcing it to pure black and white joins the dots back up.
+ */
+function decodeStyled(canvas: HTMLCanvasElement): string | null {
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return null;
+  const { width: w, height: h } = canvas;
+  const img = ctx.getImageData(0, 0, w, h);
+  const px = img.data;
+  const gray = new Float32Array(w * h);
+  for (let i = 0; i < gray.length; i++) gray[i] = 0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2];
+  for (const frac of [0.008, 0.006]) {
+    const r = Math.max(1, Math.round(Math.max(w, h) * frac));
+    const blurred = boxBlur(boxBlur(gray, w, h, r, true), w, h, r, false);
+    let lo = 255, hi = 0;
+    for (let i = 0; i < blurred.length; i++) { if (blurred[i] < lo) lo = blurred[i]; if (blurred[i] > hi) hi = blurred[i]; }
+    if (hi - lo < 40) continue;
+    for (const k of [0.8, 0.7, 0.6]) {
+      const thr = lo + k * (hi - lo);
+      const out = new Uint8ClampedArray(w * h * 4);
+      for (let i = 0; i < blurred.length; i++) {
+        const v = blurred[i] < thr ? 0 : 255;
+        out[i * 4] = out[i * 4 + 1] = out[i * 4 + 2] = v; out[i * 4 + 3] = 255;
+      }
+      const text = jsQR(out, w, h, { inversionAttempts: "dontInvert" })?.data;
+      if (text) return text;
+    }
+  }
+  return null;
+}
+
+function boxBlur(src: Float32Array, w: number, h: number, r: number, horizontal: boolean): Float32Array {
+  const out = new Float32Array(src.length);
+  const len = horizontal ? w : h, lines = horizontal ? h : w;
+  const at = (line: number, i: number) => (horizontal ? line * w + i : i * w + line);
+  for (let l = 0; l < lines; l++) {
+    let sum = 0;
+    for (let i = -r; i <= r; i++) sum += src[at(l, Math.min(len - 1, Math.max(0, i)))];
+    for (let i = 0; i < len; i++) {
+      out[at(l, i)] = sum / (2 * r + 1);
+      sum += src[at(l, Math.min(len - 1, i + r + 1))] - src[at(l, Math.max(0, i - r))];
+    }
+  }
+  return out;
+}
+
 /** The crop sweep may add at most this long to a photo that has no QR code (the AI read starts right after). */
 const SWEEP_BUDGET_MS = 1500;
 
@@ -67,9 +114,9 @@ export async function qrFieldsFromDataUrl(dataUrl: string): Promise<Partial<Extr
   const W = img.naturalWidth, H = img.naturalHeight;
   let fallback: Partial<ExtractedCard> = {};
 
-  const attempt = (c: HTMLCanvasElement, inverted: boolean): Partial<ExtractedCard> | null => {
+  const attempt = (c: HTMLCanvasElement, inverted: boolean, styled = false): Partial<ExtractedCard> | null => {
     try {
-      const text = decodeCanvas(c, inverted);
+      const text = decodeCanvas(c, inverted) || (styled ? decodeStyled(c) : null);
       if (!text) return null;
       const f = parseQRText(text);
       return Object.keys(f).length ? f : null;
@@ -84,6 +131,8 @@ export async function qrFieldsFromDataUrl(dataUrl: string): Promise<Partial<Extr
 
   // Pass 1: the whole picture (handles QR codes that fill a good part of the frame, also light-on-dark ones).
   let hit = consider(attempt(drawScaled(img, 0, 0, W, H, Math.min(1400, Math.max(W, H))), true));
+  if (hit) return hit;
+  hit = consider(attempt(drawScaled(img, 0, 0, W, H, Math.min(900, Math.max(W, H))), true, true));
   if (hit) return hit;
 
   // Pass 2: overlapping crops, centre first (cards and badges are usually framed in the middle), upscaled so a
@@ -102,7 +151,7 @@ export async function qrFieldsFromDataUrl(dataUrl: string): Promise<Partial<Extr
   for (const w of windows) {
     if (performance.now() - start > SWEEP_BUDGET_MS) break;
     await tick();
-    hit = consider(attempt(drawScaled(img, W * w.x, H * w.y, W * w.f, H * w.f, 760), false));
+    hit = consider(attempt(drawScaled(img, W * w.x, H * w.y, W * w.f, H * w.f, 700), false));
     if (hit) return hit;
   }
   return fallback;
