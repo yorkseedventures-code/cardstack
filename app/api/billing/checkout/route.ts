@@ -28,13 +28,13 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user || !user.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  let plan: PlanId;
+  let plan: PlanId | "gift";
   try {
     const body = await req.json();
-    if (body.plan !== "pass" && body.plan !== "monthly" && body.plan !== "mini") {
+    if (body.plan !== "pass" && body.plan !== "monthly" && body.plan !== "mini" && body.plan !== "gift") {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }
-    plan = body.plan;
+    plan = body.plan as PlanId | "gift";
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
@@ -44,7 +44,8 @@ export async function POST(req: NextRequest) {
 
   try {
     const stripe = getStripe();
-    const priceId = getPriceId(plan);
+    // A gift is an Event Pass bought for someone else, so it uses the Event Pass price.
+    const priceId = getPriceId(plan === "gift" ? "pass" : plan);
 
     const session = await stripe.checkout.sessions.create({
       mode: plan === "monthly" ? "subscription" : "payment",
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
       client_reference_id: user.id,
       metadata: { user_id: user.id, plan },
       subscription_data: plan === "monthly" ? { metadata: { user_id: user.id, plan } } : undefined,
-      success_url: `${siteUrl}/?upgraded=1`,
+      success_url: plan === "gift" ? `${siteUrl}/gift/sent?session_id={CHECKOUT_SESSION_ID}` : `${siteUrl}/?upgraded=1`,
       cancel_url: `${siteUrl}/?upgrade_canceled=1`,
     });
 

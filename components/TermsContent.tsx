@@ -82,7 +82,7 @@ export default function TermsContent() {
               5. Plans, scan limits and payments
             </h2>
             <p>
-              {`Free accounts include ${FREE_SCANS_PER_MONTH} scans per calendar month. Paid options: Event Pass (${PASS_PRICE} one-time, up to ${PRICING.pass.scanCap} scans over ${PRICING.pass.durationDays} days), Monthly (${MONTHLY_PRICE} per month, up to ${PRICING.monthly.scanCap} scans per month, renews until cancelled) and Mini Pass (${MINI_PRICE} one-time, ${MINI_SCANS} additional scans valid ${PRICING.mini.validDays} days). Prices are in US dollars. Payments are processed by Stripe; we never see or store your card details.`}
+              {`Free accounts include ${FREE_SCANS_PER_MONTH} scans per calendar month. Paid options: Event Pass (${PASS_PRICE} one-time, up to ${PRICING.pass.scanCap} scans over ${PRICING.pass.durationDays} days), Monthly (${MONTHLY_PRICE} per month, up to ${PRICING.monthly.scanCap} scans per month, renews until cancelled) and Mini Pass (${MINI_PRICE} one-time, ${MINI_SCANS} additional scans valid ${PRICING.mini.validDays} days). Prices are in US dollars. A Gift Event Pass costs the same as an Event Pass and is delivered as a one-time private claim link; whoever opens the link first while signed in receives it, so only share it with the person you're gifting. Payments are processed by Stripe; we never see or store your card details.`}
             </p>
           </section>
 

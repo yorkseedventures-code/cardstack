@@ -22,7 +22,7 @@ KoiCard lets you take a photo (or scan a QR code / vCard) of a business card and
 - Manual and follow-up-date-based urgency flags, with reminders
 - Color-coded contact organization and search
 - CSV export and optional Google Sheets sync via webhook
-- Gifting: buy and send an Event Pass to another user
+- Gifting: buy an Event Pass for $5.99 and send the private claim link to anyone; it works once
 - Cross-device sync via account sign-in (Google OAuth)
 
 ## Company

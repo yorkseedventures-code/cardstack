@@ -1,86 +1,67 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServerSupabase } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
+import { PRICING, PASS_DURATION_MS } from "@/lib/pricing";
+import { rateLimit } from "@/lib/rate-limit";
 
-import { PRICING } from "@/lib/pricing";
-
-const EVENT_PASS_DAYS = PRICING.pass.durationDays;
-
-// Public: check whether a gift code is valid/unredeemed, without needing auth.
-// Used by the /gift/[code] claim page to show the right message before login.
-export async function GET(_req: NextRequest, { params }: { params: { code: string } }) {
-  const admin = createAdminClient();
-  const { data: gift, error } = await admin
-    .from("gifts")
-    .select("code, plan, redeemed, to_email")
-    .eq("code", params.code)
-    .single();
-
-  if (error || !gift) {
-    return NextResponse.json({ found: false }, { status: 404 });
-  }
-
-  return NextResponse.json({
-    found: true,
-    plan: gift.plan,
-    redeemed: gift.redeemed,
-    to_email: gift.to_email,
-  });
+function getIP(req: NextRequest) {
+  return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 }
 
-// Authenticated: claim a gift and activate the pass on the signed-in user's account.
-export async function POST(_req: NextRequest, { params }: { params: { code: string } }) {
-  const supabase = createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+// Public: is this gift code valid and unclaimed? Used by the /gift/[code] page before login.
+// Deliberately returns nothing about who bought it.
+export async function GET(req: NextRequest, { params }: { params: { code: string } }) {
+  const { allowed } = rateLimit(`ip:gift:${getIP(req)}`, 60, 60_000);
+  if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
 
   const admin = createAdminClient();
+  const { data: gift } = await admin.from("gifts").select("redeemed").eq("code", params.code).maybeSingle();
+  if (!gift) return NextResponse.json({ found: false }, { status: 404 });
+  return NextResponse.json({ found: true, redeemed: gift.redeemed });
+}
 
-  const { data: gift, error: fetchError } = await admin
+// Authenticated: claim a gift. Grants a normal Event Pass entitlement (same cap and length as a purchased one).
+export async function POST(req: NextRequest, { params }: { params: { code: string } }) {
+  const supabase = createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { allowed } = rateLimit(`user:gift:${user.id}`, 10, 60_000);
+  if (!allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+
+  const admin = createAdminClient();
+  const now = new Date();
+
+  // Claim atomically: only the first caller flips redeemed from false to true.
+  const { data: claimed, error: claimError } = await admin
     .from("gifts")
-    .select("*")
+    .update({ redeemed: true, redeemed_by: user.id, redeemed_at: now.toISOString() })
     .eq("code", params.code)
-    .single();
+    .eq("redeemed", false)
+    .select("code")
+    .maybeSingle();
 
-  if (fetchError || !gift) {
-    return NextResponse.json({ error: "Gift code not found" }, { status: 404 });
-  }
-  if (gift.redeemed) {
+  if (claimError) return NextResponse.json({ error: "Couldn't claim this gift" }, { status: 500 });
+  if (!claimed) {
+    const { data: exists } = await admin.from("gifts").select("redeemed").eq("code", params.code).maybeSingle();
+    if (!exists) return NextResponse.json({ error: "Gift code not found" }, { status: 404 });
     return NextResponse.json({ error: "This gift has already been claimed" }, { status: 410 });
   }
 
-  const { data: existingProfile } = await admin
-    .from("profiles")
-    .select("event_pass_expires_at")
-    .eq("user_id", user.id)
-    .single();
+  const expires = new Date(now.getTime() + PASS_DURATION_MS);
+  const { error: grantError } = await admin.from("entitlements").insert({
+    user_id: user.id,
+    plan: "pass",
+    status: "active",
+    stripe_session_id: `gift_${params.code}`,
+    current_period_end: expires.toISOString(),
+  });
 
-  const now = new Date();
-  const currentExpiry = existingProfile?.event_pass_expires_at
-    ? new Date(existingProfile.event_pass_expires_at)
-    : null;
-  // If they already have time left on an Event Pass, extend from that; otherwise start from now.
-  const base = currentExpiry && currentExpiry > now ? currentExpiry : now;
-  const newExpiry = new Date(base.getTime() + EVENT_PASS_DAYS * 24 * 60 * 60 * 1000);
-
-  const { error: profileError } = await admin
-    .from("profiles")
-    .upsert({ user_id: user.id, plan: "event", event_pass_expires_at: newExpiry.toISOString(), updated_at: now.toISOString() });
-
-  if (profileError) {
-    return NextResponse.json({ error: profileError.message }, { status: 500 });
+  if (grantError) {
+    // Put the gift back so the recipient can try again instead of losing it.
+    await admin.from("gifts").update({ redeemed: false, redeemed_by: null, redeemed_at: null }).eq("code", params.code);
+    return NextResponse.json({ error: "Couldn't activate the pass, please try again" }, { status: 500 });
   }
 
-  const { error: redeemError } = await admin
-    .from("gifts")
-    .update({ redeemed: true, redeemed_by: user.id, redeemed_at: now.toISOString() })
-    .eq("code", params.code);
-
-  if (redeemError) {
-    return NextResponse.json({ error: redeemError.message }, { status: 500 });
-  }
-
-  return NextResponse.json({ success: true, event_pass_expires_at: newExpiry.toISOString() });
+  return NextResponse.json({ success: true, expires_at: expires.toISOString(), scans: PRICING.pass.scanCap });
 }

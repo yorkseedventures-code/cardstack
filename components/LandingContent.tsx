@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { FAQS } from "@/lib/faqs";
 import SignupCounter from "@/components/SignupCounter";
-import { FREE_SCANS_PER_MONTH, PASS_PRICE, MONTHLY_PRICE, PRICING } from "@/lib/pricing";
+import ScreenshotStrip from "@/components/ScreenshotStrip";
+import { FREE_SCANS_PER_MONTH, PASS_PRICE, MONTHLY_PRICE, MINI_PRICE, PRICING } from "@/lib/pricing";
 
 export default function LandingContent() {
   const router = useRouter();
@@ -55,12 +56,32 @@ export default function LandingContent() {
             { label: "Free", sub: `${FREE_SCANS_PER_MONTH} scans/month` },
             { label: "Event Pass", sub: `${PASS_PRICE} · ${PRICING.pass.durationDays} days · ${PRICING.pass.scanCap} scans` },
             { label: "Monthly", sub: `${MONTHLY_PRICE}/month · ${PRICING.monthly.scanCap} scans` },
+            { label: "Mini Pass", sub: `${MINI_PRICE} · ${PRICING.mini.scans} more scans` },
           ].map(p => (
             <div key={p.label} style={{ background: "#f7f5f2", borderRadius: 12, padding: "10px 16px", textAlign: "center" }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: "#1a1714" }}>{p.label}</div>
               <div style={{ fontSize: 10, color: "#b8b0a6", marginTop: 2 }}>{p.sub}</div>
             </div>
           ))}
+        </div>
+
+        {/* See it in action */}
+        <div style={{ width: "100%", marginBottom: 48 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 900, color: "#1a1714", marginBottom: 14, textAlign: "center" }}>See how it works</h2>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
+            <video
+              src="/screens/demo.mp4"
+              poster="/screens/demo-poster.jpg"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-label="KoiCard demo: scan a card, review the details and save the contact"
+              style={{ width: "100%", maxWidth: 260, height: "auto", borderRadius: 18, border: "1px solid #e8e4dc", background: "#f7f5f2" }}
+            />
+          </div>
+          <ScreenshotStrip width={170} />
         </div>
 
         {/* Features */}

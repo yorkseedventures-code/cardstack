@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { CONTACT_COLORS } from "@/lib/colors";
 import { IN_APP_TIPS, FAQS } from "@/lib/faqs";
 import { loadColorLabels, setCachedLabels } from "@/lib/colorLabels";
+import { PASS_PRICE } from "@/lib/pricing";
+import ScreenshotStrip from "@/components/ScreenshotStrip";
 
 const DEFAULT_LABELS: Record<string, string> = {
   grey: "",
@@ -28,6 +30,21 @@ export default function SettingsTab({ user, onSignOut, onShare, shareCopied }: S
   const [labelsError, setLabelsError] = useState("");
   const [billingBusy, setBillingBusy] = useState(false);
   const [billingError, setBillingError] = useState("");
+
+  const [giftBusy, setGiftBusy] = useState(false);
+  const buyGift = async () => {
+    setBillingError("");
+    setGiftBusy(true);
+    try {
+      const res = await fetch("/api/billing/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ plan: "gift" }) });
+      const d = await res.json();
+      if (!res.ok || !d.url) throw new Error(d.error || "Couldn't start checkout");
+      window.location.href = d.url;
+    } catch (e: any) {
+      setBillingError(e?.message || "Couldn't start checkout");
+      setGiftBusy(false);
+    }
+  };
 
   const openBilling = async () => {
     setBillingError("");
@@ -92,6 +109,9 @@ export default function SettingsTab({ user, onSignOut, onShare, shareCopied }: S
         <button onClick={openBilling} disabled={billingBusy} style={{ width: "100%", padding: "11px 0", borderRadius: 30, background: "#fff", border: "0.5px solid #e0dbd4", fontSize: 13, color: "#666", fontWeight: 600, cursor: "pointer", marginBottom: 8 }}>
           {billingBusy ? "Opening..." : "Manage or cancel Monthly plan"}
         </button>
+        <button onClick={buyGift} disabled={giftBusy} style={{ width: "100%", padding: "11px 0", borderRadius: 30, background: "#fff", border: "0.5px solid #e0dbd4", fontSize: 13, color: "#666", fontWeight: 600, cursor: "pointer", marginBottom: 8 }}>
+          {giftBusy ? "Opening..." : `🎁 Gift an Event Pass (${PASS_PRICE})`}
+        </button>
         {billingError && <p style={{ color: "#dc2626", fontSize: 12, margin: "0 0 8px", textAlign: "center" }}>{billingError}</p>}
         <button onClick={onSignOut} style={{ width: "100%", padding: "11px 0", borderRadius: 30, background: "#fff", border: "0.5px solid #e0dbd4", fontSize: 13, color: "#666", fontWeight: 600, cursor: "pointer" }}>
           Sign out
@@ -123,6 +143,8 @@ export default function SettingsTab({ user, onSignOut, onShare, shareCopied }: S
       {/* How to use */}
       {card(<>
         {sectionTitle("How to use KoiCard")}
+        <ScreenshotStrip width={130} />
+        <div style={{ height: 8 }} />
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {IN_APP_TIPS.map((tip, i) => (
             <div key={i}>

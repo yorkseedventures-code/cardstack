@@ -28,7 +28,7 @@ export default function GiftClaimPage({ params }: { params: { code: string } }) 
       const redeemRes = await fetch(`/api/gifts/${params.code}`, { method: "POST" });
       const redeemBody = await redeemRes.json().catch(() => ({}));
       if (redeemRes.ok) {
-        setExpiresAt(redeemBody.event_pass_expires_at);
+        setExpiresAt(redeemBody.expires_at);
         setStatus("claimed");
       } else if (redeemRes.status === 410) {
         setStatus("already_claimed");
@@ -68,7 +68,7 @@ export default function GiftClaimPage({ params }: { params: { code: string } }) 
           <>
             <div className="text-3xl mb-3">🎁</div>
             <h1 className="text-xl font-bold text-[#111] mb-2">You've got an Event Pass!</h1>
-            <p className="text-sm text-[#888] mb-5">Sign up or log in to claim your {PRICING.pass.durationDays} days of unlimited scanning.</p>
+            <p className="text-sm text-[#888] mb-5">Sign up or log in to claim {PRICING.pass.durationDays} days of scanning (up to {PRICING.pass.scanCap} scans).</p>
             <button onClick={goToLogin} className="w-full py-3 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand/90 transition-all">
               Claim your pass
             </button>
@@ -82,7 +82,7 @@ export default function GiftClaimPage({ params }: { params: { code: string } }) 
             <div className="text-3xl mb-3">🎉</div>
             <h1 className="text-xl font-bold text-[#111] mb-2">Pass activated!</h1>
             <p className="text-sm text-[#888] mb-5">
-              Unlimited scans until{" "}
+              Up to {PRICING.pass.scanCap} scans until{" "}
               {expiresAt ? new Date(expiresAt).toLocaleDateString(undefined, { month: "long", day: "numeric" }) : `in ${PRICING.pass.durationDays} days`}.
             </p>
             <button onClick={() => router.push("/")} className="w-full py-3 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand/90 transition-all">

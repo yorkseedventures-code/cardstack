@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const userId = session.metadata?.user_id || session.client_reference_id;
-        const plan = session.metadata?.plan as "pass" | "monthly" | "mini" | undefined;
+        const plan = session.metadata?.plan as "pass" | "monthly" | "mini" | "gift" | undefined;
         if (!userId || !plan) break;
 
         if (plan === "pass") {
@@ -81,6 +81,16 @@ export async function POST(req: NextRequest) {
             stripeSessionId: session.id,
             currentPeriodEnd: new Date(Date.now() + PASS_DURATION_MS),
           });
+        } else if (plan === "gift") {
+          // Gift: create a claim code the buyer can share. Idempotent on the checkout session id.
+          const admin = createAdminClient();
+          const { error: giftError } = await admin.from("gifts").insert({
+            plan: "pass",
+            buyer_id: userId,
+            from_email: session.customer_details?.email ?? null,
+            stripe_session_id: session.id,
+          });
+          if (giftError && giftError.code !== "23505") throw giftError;
         } else if (plan === "mini") {
           // Mini Pass: 150 extra scans, valid for 30 days from purchase.
           await grantEntitlement({

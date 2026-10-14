@@ -38,6 +38,10 @@ export const FAQS = [
     a: `Event Pass: one payment of ${PASS_PRICE}, up to ${PRICING.pass.scanCap} scans over ${PRICING.pass.durationDays} days, does not renew. Monthly: ${MONTHLY_PRICE}/month, up to ${PRICING.monthly.scanCap} scans a month, renews until cancelled. Mini Pass: one payment of ${MINI_PRICE} adds ${MINI_SCANS} scans on top of what you already have, valid ${PRICING.mini.validDays} days, does not renew. Passes can be bought again whenever you need.`,
   },
   {
+    q: "Can I gift KoiCard to someone?",
+    a: `Yes. In Settings, tap Gift an Event Pass and pay ${PASS_PRICE}. You'll get a private link to send to a friend, colleague or client. When they open it and sign up or log in, the Event Pass (${PRICING.pass.durationDays} days, up to ${PRICING.pass.scanCap} scans) is added to their account. Each link works once.`,
+  },
+  {
     q: "Can I cancel my Monthly plan myself?",
     a: `Yes, anytime, no email needed. Go to Settings, tap Manage or cancel Monthly plan, and cancel in a couple of taps. You can also update your card and see invoices there. Cancelling stops future renewals and you keep access until the end of the period you've paid for. Event Passes and Mini Passes are one-time and never renew. Questions about a payment? Email ${SUPPORT_EMAIL}.`,
   },
