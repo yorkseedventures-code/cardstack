@@ -38,8 +38,8 @@ export const FAQS = [
     a: `Event Pass: one payment of ${PASS_PRICE}, up to ${PRICING.pass.scanCap} scans over ${PRICING.pass.durationDays} days, does not renew. Monthly: ${MONTHLY_PRICE}/month, up to ${PRICING.monthly.scanCap} scans a month, renews until cancelled. Mini Pass: one payment of ${MINI_PRICE} adds ${MINI_SCANS} scans on top of what you already have, valid ${PRICING.mini.validDays} days, does not renew. Passes can be bought again whenever you need.`,
   },
   {
-    q: "How do I cancel or get help with a payment?",
-    a: `Yes, on your own. Go to Settings, tap Manage or cancel Monthly plan, and cancel in a couple of taps. You can also update your card and see invoices there. Cancelling stops future renewals and you keep access until the end of the period you've paid for. For anything else, email ${SUPPORT_EMAIL}.`,
+    q: "Can I cancel my Monthly plan myself?",
+    a: `Yes, anytime, no email needed. Go to Settings, tap Manage or cancel Monthly plan, and cancel in a couple of taps. You can also update your card and see invoices there. Cancelling stops future renewals and you keep access until the end of the period you've paid for. Event Passes and Mini Passes are one-time and never renew. Questions about a payment? Email ${SUPPORT_EMAIL}.`,
   },
   {
     q: "Who is KoiCard for?",
