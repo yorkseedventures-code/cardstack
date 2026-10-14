@@ -63,7 +63,7 @@ export default function Scanner({ onExtracted }: ScannerProps) {
       }
       // A website / LinkedIn QR on the card fills those fields if the AI didn't find them in the text.
       const merged = { ...data };
-      for (const k of ["linkedin", "website", "email", "phone"] as const) {
+      for (const k of ["linkedin", "website", "email", "phone", "instagram", "x_handle"] as const) {
         if (!merged[k] && qr[k]) merged[k] = qr[k] as string;
       }
       onExtracted(merged, dataUrl);

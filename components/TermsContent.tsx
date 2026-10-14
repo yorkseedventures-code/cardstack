@@ -60,7 +60,9 @@ export default function TermsContent() {
             <p>
               Contact details are extracted automatically using AI and may
               occasionally be inaccurate or incomplete. Always review
-              extracted information before saving or acting on it. LinkedIn
+              extracted information before saving or acting on it. Contact QR
+              codes are read on your device and fill in whatever the code
+              contains; check them too, since a code may be outdated or wrong. LinkedIn
               links are only filled in when they appear on the card; otherwise
               you can add them yourself.
             </p>
@@ -109,7 +111,7 @@ export default function TermsContent() {
               8. Saved contacts
             </h2>
             <p>
-              Reaching a scan limit never locks or deletes the contacts you've already saved. You can always view, edit and export them, including your color labels, in your CSV export.
+              Scanning a contact QR code (vCard) is read on your device and does not use a scan. Reaching a scan limit never locks or deletes the contacts you've already saved. You can always view, edit and export them, including your color labels, in your CSV export.
             </p>
           </section>
 

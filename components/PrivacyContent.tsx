@@ -24,7 +24,7 @@ export default function PrivacyContent() {
 
       <main className="flex-1 px-6 py-10 max-w-2xl mx-auto w-full">
         <h1 className="text-3xl font-bold text-[#111] mb-2">Privacy Policy</h1>
-        <p className="text-xs text-[#bbb] mb-10">Last updated: August 2026</p>
+        <p className="text-xs text-[#bbb] mb-10">Last updated: October 2026</p>
 
         <div className="bg-white border border-brand/20 rounded-xl p-5 mb-10">
           <p className="text-sm text-[#111] leading-relaxed">
@@ -59,6 +59,12 @@ export default function PrivacyContent() {
               read, review, analyze, or use your contacts or scanned cards
               for any purpose other than displaying them back to you inside
               the app.
+            </p>
+            <p className="mt-3">
+              Contact QR codes (vCards) are read directly on your device, so
+              their contents are not sent to an AI provider. A QR code on a
+              card that only links to a website or profile is read the same
+              way; the rest of that card is read as described above.
             </p>
           </section>
 

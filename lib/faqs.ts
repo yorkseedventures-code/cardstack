@@ -3,11 +3,15 @@ import { FREE_SCANS_PER_MONTH, PASS_PRICE, MONTHLY_PRICE, PRICING, MINI_PRICE, M
 export const FAQS = [
   {
     q: "How does KoiCard scan a business card?",
-    a: "Take a photo with your camera or upload one. AI reads the card and fills in name, title, company, email, phone, website, LinkedIn, Instagram, X, and address automatically. You can edit anything before saving.",
+    a: "Take a photo with your camera or upload one. If the card has a contact QR code, KoiCard reads it instantly. Otherwise AI reads the card and fills in name, title, company, email, phone, website, LinkedIn, Instagram, X, and address automatically. You can edit anything before saving.",
   },
   {
     q: "Does KoiCard read QR codes?",
     a: "Yes. If a card, badge or phone screen shows a contact QR code (a vCard), point the camera at it or upload a photo and KoiCard fills in the whole contact instantly, for free, without using a scan. If the QR just links to a website or LinkedIn profile, KoiCard adds that link to the contact and reads the rest of the card as usual.",
+  },
+  {
+    q: "Which QR codes work, and which don't?",
+    a: "Work: contact QR codes in vCard or MECARD format (these fill in the whole contact, free, no scan used). Also work, but only add one field: LinkedIn, Instagram and X profile links, website links, email (mailto:) and phone (tel:) codes. Don't work: codes that open a digital business card page (such as Linq, HiHello or Popl), event or badge-app codes that point to a web page, Wi-Fi, payment, app-store and calendar codes. KoiCard doesn't open links, so it can only save the web address, not the details behind it. For those, photograph the printed card instead and AI will read the text.",
   },
   {
     q: "What fields does KoiCard extract?",
@@ -27,7 +31,7 @@ export const FAQS = [
   },
   {
     q: "Is my data private?",
-    a: "Your contacts are tied to your account only. KoiCard doesn't sell your data, use it for advertising, or train AI models on it.",
+    a: "Your contacts are tied to your account only. KoiCard doesn't sell your data, use it for advertising, or train AI models on it. Contact QR codes are read on your device and never sent to an AI provider.",
   },
   {
     q: "How much does KoiCard cost?",
@@ -35,7 +39,7 @@ export const FAQS = [
   },
   {
     q: "What happens when I run out of scans?",
-    a: `You'll see a pop-up with options to keep going. Free users get ${FREE_SCANS_PER_MONTH} scans a month, and an Event Pass or Monthly plan has its own scan limit. Anyone can add a Mini Pass (${MINI_PRICE} for ${MINI_SCANS} more scans, valid ${PRICING.mini.validDays} days). Your saved contacts are never locked, only new scans. Need more than that? Email ${SUPPORT_EMAIL}.`,
+    a: `You'll see a pop-up with options to keep going. (Contact QR codes never use a scan, so those still work.) Free users get ${FREE_SCANS_PER_MONTH} scans a month, and an Event Pass or Monthly plan has its own scan limit. Anyone can add a Mini Pass (${MINI_PRICE} for ${MINI_SCANS} more scans, valid ${PRICING.mini.validDays} days). Your saved contacts are never locked, only new scans. Need more than that? Email ${SUPPORT_EMAIL}.`,
   },
   {
     q: "How do the Event Pass, Monthly plan and Mini Pass work?",
@@ -59,12 +63,17 @@ export const IN_APP_TIPS = [
   {
     icon: "📷",
     title: "Scanning",
-    body: "Tap 'Scan' and use your camera or upload a photo. Hold the card flat and make sure text is in frame. AI fills everything in - edit before saving.",
+    body: "Tap 'Scan' and use your camera or upload a photo. Hold the card flat and make sure text is in frame. If there is a contact QR code, it fills in instantly. Otherwise AI fills everything in. Edit before saving.",
   },
   {
     icon: "🎨",
     title: "Color coding",
     body: "Assign a color to each contact when saving or from the contact detail view. Use colors however works for you - by type, event, priority, or status. Name each color in Settings (your names are saved to your account and appear in your CSV export).",
+  },
+  {
+    icon: "🔳",
+    title: "QR codes",
+    body: "Point the camera at a contact QR code (on a card, a badge or someone's phone) and KoiCard captures it by itself. It fills in the whole contact in an instant and doesn't use a scan. You can also upload a photo or screenshot of a QR code.",
   },
   {
     icon: "🎟️",

@@ -78,7 +78,7 @@ export default function LandingContent() {
         {/* Features */}
         <div className="ld-features" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, width: "100%", marginBottom: 56 }}>
           {[
-            { icon: "📷", label: "Camera scan" },
+            { icon: "📷", label: "Camera & QR scan" },
             { icon: "🤖", label: "AI extracts info" },
             { icon: "📇", label: "CSV export" },
             { icon: "☁️", label: "Syncs everywhere" },

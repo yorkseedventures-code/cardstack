@@ -17,6 +17,11 @@ export function parseQRText(text: string): Partial<ExtractedCard> {
   const t = text.trim();
   if (/^mailto:/i.test(t)) return { email: decodeURIComponent(t.slice(7).split("?")[0]) };
   if (/^tel:/i.test(t)) return { phone: decodeURIComponent(t.slice(4)) };
+  // Social profile links go to the matching field instead of "website".
+  const ig = t.match(/^https?:\/\/(?:www\.)?instagram\.com\/([A-Za-z0-9._]+)\/?(?:[?#].*)?$/i);
+  if (ig && !["p", "reel", "explore", "stories"].includes(ig[1].toLowerCase())) return { instagram: "@" + ig[1] };
+  const x = t.match(/^https?:\/\/(?:www\.)?(?:x|twitter)\.com\/([A-Za-z0-9_]+)\/?(?:[?#].*)?$/i);
+  if (x && !["home", "i", "share", "intent", "search"].includes(x[1].toLowerCase())) return { x_handle: "@" + x[1] };
   return extractFromQRText(t);
 }
 

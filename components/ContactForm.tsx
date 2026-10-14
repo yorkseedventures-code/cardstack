@@ -13,10 +13,10 @@ interface ContactFormProps {
 }
 
 export default function ContactForm({ extracted, fromQR, imageDataUrl, onSaved, onReset }: ContactFormProps) {
-  const [form, setForm] = useState({ ...extracted, event: "", follow_up: "", notes: "", color: "grey", instagram: "", x_handle: "", address: "" });
+  const [form, setForm] = useState({ event: "", follow_up: "", notes: "", color: "grey", ...extracted });
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { setForm({ ...extracted, event: "", follow_up: "", notes: "", color: "grey", instagram: "", x_handle: "", address: "" }); }, [extracted]);
+  useEffect(() => { setForm({ event: "", follow_up: "", notes: "", color: "grey", ...extracted }); }, [extracted]);
 
   const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [key]: e.target.value }));
